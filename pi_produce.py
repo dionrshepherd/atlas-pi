@@ -1,9 +1,8 @@
 import time
 import serial
 import os
-# import re
-import boto3
 import sys
+import boto3
 
 anchorId = os.environ['ANCHOR_ID']
 if len(anchorId) > 4:
@@ -63,8 +62,11 @@ try:
         while (data != b' '):
             data = ser.read()
 
-        line = ser.read(27)
-        print(line)
+        bLine = ser.read(27)
+        sLine = bLine[2:6].decode()
+        sLine += bLine[22:27].decode()
+
+        print(sLine)
 
 except KeyboardInterrupt:
     print('...Closing...')
@@ -75,18 +77,6 @@ except KeyboardInterrupt:
     time.sleep(2)
     ser.close()
     sys.exit(0)
-    
-    # while (data == b'\n'):
-    #     print(line)
-
-    # while (data != b'\r'):
-    #     bufr += data.decode()
-    #     data = ser.read()
-
-    # print(bufr)
-
-    # remove uneeded data that is between [] and split based on a space
-    #positions = re.sub("[\(\[].*?[\)\]]", '', data).split()
 
     # set timestamp arrays
     #timeStamp = time.time()

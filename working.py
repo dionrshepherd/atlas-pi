@@ -1,10 +1,8 @@
 import time
 import serial
-import re
 import boto3
 import sys
 import os
-import signal
 
 anchorId = '99A4'
 print('...Anchor ID: ' + anchorId + '...')
@@ -28,7 +26,6 @@ def putToDB(time, tags, dist, anchorId):
 print('...Opening serial port...')
 ser = serial.Serial(
     port='/dev/tty.usbmodem1421',
-    # port='/dev/ttyACM0',
     baudrate=115200,
     parity=serial.PARITY_ODD,
     stopbits=serial.STOPBITS_ONE_POINT_FIVE,
@@ -61,8 +58,11 @@ try:
         while (data != b' '):
             data = ser.read()
 
-        line = ser.read(27)
-        print(line)
+        bLine = ser.read(27)
+        sLine = bLine[2:6].decode()
+        sLine += bLine[22:27].decode()
+
+        print(sLine)
 
 except KeyboardInterrupt:
     print('...Closing...')
@@ -73,15 +73,6 @@ except KeyboardInterrupt:
     time.sleep(2)
     ser.close()
     sys.exit(0)
-
-    # while (data != b'\r'):
-    #     bufr += data.decode()
-    #     data = ser.read()
-
-    # print(bufr)
-
-    # remove uneeded data that is between [] and split based on a space
-    #positions = re.sub("[\(\[].*?[\)\]]", '', data).split()
 
     # set timestamp arrays
     #timeStamp = time.time()
