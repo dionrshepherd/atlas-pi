@@ -36,7 +36,7 @@ ser = serial.Serial(
     parity=serial.PARITY_ODD,
     stopbits=serial.STOPBITS_ONE_POINT_FIVE,
     bytesize=serial.SEVENBITS,
-    timeout=0.1
+    #timeout=0.1
 )
 
 print("Cleaning up some data")
@@ -75,10 +75,10 @@ print("HERE WE GO (in mario voice)")
 while True:
 
     data = ser.read()
-    while (data != b'\n'):
+    while (data != b' '):
         data = ser.read()
 
-    line = ser.read(27)
+    line = ser.read(28)
     print(line)
     # while (data == b'\n'):
     #     print(line)
