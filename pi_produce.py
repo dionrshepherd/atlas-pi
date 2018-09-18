@@ -10,8 +10,8 @@ anchorId = os.environ['ANCHOR_ID']
 if len(anchorId) > 4:
     print('Anchor ID has not been set in .bashrc')
     sys.exit(1)
-anchorId = '99A4'
 print('anchorId: ' + anchorId)
+
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('spark_iot_tag_distances')
 
@@ -31,7 +31,6 @@ def putToDB(time, tags, dist, anchorId):
 
 print("Opening serial")
 ser = serial.Serial(
-    # port='/dev/tty.usbmodem1421',
     port='/dev/ttyACM0',
     baudrate=115200,
     parity=serial.PARITY_ODD,
@@ -74,8 +73,6 @@ count = 0
 print("HERE WE GO (in mario voice)")
 # keep reading positions
 while True:
-    # get position data and strip newlines
-    #data = ser.read(128)#line()#.rstrip().decode()
     line = ""
 
     data = ser.read()
@@ -84,8 +81,10 @@ while True:
         data = ser.read()
 
     data = ser.read()
-    if (data == b'\n'):
+    if (data == b'\n'): # probably dont need this
         print(line)
+
+    ser.flushOutput()
 
     # while (data != b'\r'):
     #     bufr += data.decode()

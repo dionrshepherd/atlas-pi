@@ -5,11 +5,6 @@ import boto3
 import sys
 import os
 
-print("starting")
-anchorId = os.environ['ANCHOR_ID']
-if len(anchorId) > 4:
-    print('Anchor ID has not been set in .bashrc')
-    sys.exit(1)
 anchorId = '99A4'
 print('anchorId: ' + anchorId)
 dynamodb = boto3.resource('dynamodb')
@@ -31,8 +26,8 @@ def putToDB(time, tags, dist, anchorId):
 
 print("Opening serial")
 ser = serial.Serial(
-    # port='/dev/tty.usbmodem1421',
-    port='/dev/ttyACM0',
+    port='/dev/tty.usbmodem1421',
+    # port='/dev/ttyACM0',
     baudrate=115200,
     parity=serial.PARITY_ODD,
     stopbits=serial.STOPBITS_ONE_POINT_FIVE,
