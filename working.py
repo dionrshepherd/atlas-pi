@@ -4,9 +4,10 @@ import re
 import boto3
 import sys
 import os
+import signal
 
 anchorId = '99A4'
-print('anchorId: ' + anchorId)
+print('...Anchor ID: ' + anchorId + '...')
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('spark_iot_tag_distances')
 
@@ -24,7 +25,7 @@ def putToDB(time, tags, dist, anchorId):
         }
     )
 
-print("Opening serial")
+print('...Opening serial port...')
 ser = serial.Serial(
     port='/dev/tty.usbmodem1421',
     # port='/dev/ttyACM0',
@@ -32,55 +33,46 @@ ser = serial.Serial(
     parity=serial.PARITY_ODD,
     stopbits=serial.STOPBITS_ONE_POINT_FIVE,
     bytesize=serial.SEVENBITS,
-    timeout=0.1
 )
 
-print("Cleaning up some data")
+print('...Sending les command...')
 # 2 newlines needed to access the command prompt
 ser.write(b'\r\r')
+time.sleep(0.5)
 
 # clear the buffer 
 ser.readline()
 ser.readline()
 
-print("sleepn. How bout a nap")
-
-time.sleep(1)
-
-print("writing command bits")
 # send command
 ser.write(b'les\r')
+time.sleep(0.5)
 
-print("re-re-reclearing buffer")
 # clear the buffer 
-ser.readline().decode()
-ser.readline().decode()
-ser.readline().decode()
+ser.readline()
+time.sleep(2)
+ser.flushInput()
 
-# For some reason this doesnt work everytime,
-# not sure if its an issue with the serial library
-# or the Decawave library.
-# With a tag close to the anchor you are starting
-# check to see if positional data is returned or
-# if there is some garbled positional data or no 
-# positional data. if so then kill and run again
-count = 0
-
-print("HERE WE GO (in mario voice)")
 # keep reading positions
-while True:
-    # get position data and strip newlines
-    #data = ser.read(128)#line()#.rstrip().decode()
-    line = ""
-
-    data = ser.read()
-    while (data != b'\r'):
-        line += data.decode()
+print('...Reading positions...')
+try:
+    while True:
         data = ser.read()
+        while (data != b' '):
+            data = ser.read()
 
-    data = ser.read()
-    if (data == b'\n'):
+        line = ser.read(27)
         print(line)
+
+except KeyboardInterrupt:
+    print('...Closing...')
+    ser.write(b'\r\r')
+    ser.readline()
+    ser.write(b'quit\r')
+    ser.readline()
+    time.sleep(2)
+    ser.close()
+    sys.exit(0)
 
     # while (data != b'\r'):
     #     bufr += data.decode()
