@@ -78,7 +78,7 @@ while True:
     while (data != b' '):
         data = ser.read()
 
-    line = ser.read(28)
+    line = ser.read(27)
     print(line)
     # while (data == b'\n'):
     #     print(line)
