@@ -2,7 +2,7 @@ import time
 import serial
 import os
 # import re
-# import boto3
+import boto3
 import sys
 
 anchorId = os.environ['ANCHOR_ID']
