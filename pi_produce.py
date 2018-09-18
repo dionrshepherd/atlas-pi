@@ -73,13 +73,12 @@ count = 0
 print("HERE WE GO (in mario voice)")
 # keep reading positions
 while True:
-    line = b''
 
     data = ser.read()
-    while (data != b'\r'):
+    while (data != b'\n'):
         data = ser.read()
 
-    data = ser.read()
+    line = ser.read(27)
     print(line)
     # while (data == b'\n'):
     #     print(line)
