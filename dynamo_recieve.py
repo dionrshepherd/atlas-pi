@@ -7,19 +7,17 @@ from boto3.dynamodb.conditions import Key, Attr
 from botocore.exceptions import ClientError
 import json
 
-if len(sys.argv) != 2:
-    print('No anchor id provided')
-    sys.exit(1)
-
-anchorId = sys.argv[1]
+anchorId = '99A4'
+tagId = 'C52A'
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('spark_iot_tag_distances')
+table = dynamodb.Table('atlas_dev')
 
 def getFromStream(anchorId):
     try:
         response = table.get_item(
             Key={
-                'anchors': anchorId
+                'anchor': anchorId,
+                'tag': tagId
             }
         )
     except ClientError as e:

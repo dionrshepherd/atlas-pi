@@ -59,17 +59,19 @@ try:
         while (data != b' '):
             data = ser.read()
 
-        line = ser.read(27)
-        tagId = line[2:6].decode()
-        distance = line[23:27].decode()
+        tagId = ser.read(6)
 
-        # debugging
-        print(line)
+        if (int(tagId[0]) == 13):
+            data = ser.read(21)
+            tagId = tagId[2:6]
+        else:
+            data = ser.read(19)
+            tagId = tagId[0:4]
 
-        putToDB(timeStamp, tagId, distance, anchorId)
+        # print distances to debug
+        print(data[-4:])
 
-        # flush the buffers after send so we get the most up to date information
-        ser.flushOutput()
+        putToDB(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
 
 except KeyboardInterrupt:
     print('...Closing...')
