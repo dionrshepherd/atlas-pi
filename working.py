@@ -7,18 +7,18 @@ import os
 anchorId = '99A4'
 print('...Anchor ID: ' + anchorId + '...')
 dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('spark_iot_tag_distances')
+table = dynamodb.Table('atlas_dev')
 
-def putToDB(time, tags, dist, anchorId):
+def putToDB(timeStamp, tagId, distance, anchorId):
     payload = {
-        'time': str(time),
-        'tags': tags,
-        'dist': dist
+        'ts': str(timeStamp),
+        'dist': distance,
     }
 
     response = table.put_item(
         Item={
-            'anchors': anchorId,
+            'anchor': anchorId,
+            'tag': tagId,
             'data': payload
         }
     )
@@ -54,15 +54,22 @@ ser.flushInput()
 print('...Reading positions...')
 try:
     while True:
+        timeStamp = time.time()
         data = ser.read()
         while (data != b' '):
             data = ser.read()
 
-        bLine = ser.read(27)
-        sLine = bLine[2:6].decode()
-        sLine += bLine[22:27].decode()
+        line = ser.read(27)
+        tagId = line[2:6].decode()
+        distance = line[23:27].decode()
 
-        print(sLine)
+        # debugging
+        print(line)
+
+        putToDB(timeStamp, tagId, distance, anchorId)
+
+        # flush the buffers after send so we get the most up to date information
+        ser.flushOutput()
 
 except KeyboardInterrupt:
     print('...Closing...')
@@ -73,29 +80,3 @@ except KeyboardInterrupt:
     time.sleep(2)
     ser.close()
     sys.exit(0)
-
-    # set timestamp arrays
-    #timeStamp = time.time()
-    #tags = []
-    #dist = []
-
-    # create the arrays needed to push to stream
-    #for pos in positions:
-    #    data = pos.split('=')
-
-     #   if len(data) < 2:
-      #      print('Incorrect format')
-       #     ser.close()
-        #    sys.exit(0)
-
-       # tags.append(data[0])
-       # dist.append(data[1])
-        # print out for debugging purposes
-    #print(data, end='',flush=True)
-    #print(timeStamp)
-
-    #putToDB(timeStamp, tags, dist, anchorId)
-
-    # flush the buffers after send so we get the most up to date information
-    #ser.flushOutput()
-        
