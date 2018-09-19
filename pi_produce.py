@@ -58,6 +58,7 @@ ser.flushInput()
 print('...Reading positions...')
 try:
     while True:
+        timeStamp = time.time()
         data = ser.read()
         while (data != b' '):
             data = ser.read()
