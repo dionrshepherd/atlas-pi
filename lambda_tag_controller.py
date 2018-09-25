@@ -29,4 +29,4 @@ def lambda_handler(event, context):
             tags.append(tag)
             found_tags.append(tag_id)
 
-    print(tags[0]['anchors'])
+    print(tags)
