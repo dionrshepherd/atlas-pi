@@ -2,26 +2,27 @@ import time
 import serial
 import boto3
 import sys
-import os
 
 anchorId = '99A4'
 print('...Anchor ID: ' + anchorId + '...')
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('atlas_dev')
 
-def putToDB(timeStamp, tagId, distance, anchorId):
+
+def put_to_db(dist, ti):
     payload = {
         'ts': str(timeStamp),
-        'dist': distance,
+        'dist': dist,
     }
 
-    response = table.put_item(
+    table.put_item(
         Item={
             'anchor': anchorId,
-            'tag': tagId,
+            'tag': ti,
             'data': payload
         }
     )
+
 
 print('...Opening serial port...')
 ser = serial.Serial(
@@ -56,12 +57,12 @@ try:
     while True:
         timeStamp = time.time()
         data = ser.read()
-        while (data != b' '):
+        while data != b' ':
             data = ser.read()
 
         tagId = ser.read(6)
 
-        if (int(tagId[0]) == 13):
+        if int(tagId[0]) == 13:
             data = ser.read(21)
             tagId = tagId[2:6]
         else:
@@ -71,7 +72,7 @@ try:
         # print distances to debug
         print(data[-4:])
 
-        putToDB(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
+        put_to_db(data[-4:].decode(), tagId.decode())
 
 except KeyboardInterrupt:
     print('...Closing...')
