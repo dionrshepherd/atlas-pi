@@ -1,9 +1,12 @@
 # This will be invocated everytime new data is pushed into DD
 # It is responsible for collecting tags seen from which anchors
+import boto3
+import json
 
-print('Calling Handler')
+client = boto3.client('sns')
 
-def lambda_handler(event, context):
+
+def lambda_handler(event):
     tags = []
     found_tags = []
     for record in event['Records']:
@@ -12,9 +15,9 @@ def lambda_handler(event, context):
         tag_id = record['dynamodb']['NewImage']['tag']['S']
 
         anchor = {
-            'id': anchor_id,
-            'dist': float(record['dynamodb']['NewImage']['data']['M']['dist']['S']),
-            'ts': record['dynamodb']['NewImage']['data']['M']['ts']['S']
+            "id": anchor_id,
+            "dist": float(record['dynamodb']['NewImage']['data']['M']['dist']['S']),
+            "ts": record['dynamodb']['NewImage']['data']['M']['ts']['S']
         }
 
         try:
@@ -23,10 +26,19 @@ def lambda_handler(event, context):
 
         except ValueError:
             tag = {
-                'id': tag_id,
-                'anchors': [anchor]
+                "id": tag_id,
+                "anchors": [anchor]
             }
             tags.append(tag)
             found_tags.append(tag_id)
 
-    print(tags)
+    num_records = len(event['Records'])
+    for tag in tags:
+        # basic sanity check if we get a spam on duplicates
+        if len(tag['anchors']) > num_records:
+            continue
+
+        client.publish(
+            TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-lambda',
+            Message=json.dumps(tag)
+        )
