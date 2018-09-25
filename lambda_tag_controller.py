@@ -6,7 +6,7 @@ import json
 client = boto3.client('sns')
 
 
-def lambda_handler(event):
+def lambda_handler(event, context):
     tags = []
     found_tags = []
     for record in event['Records']:
