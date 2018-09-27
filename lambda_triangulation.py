@@ -40,7 +40,7 @@ def triangulate(anchors, tag):
         "x": tag_x,
         "y": tag_y
     }
-    r.publish('atlas_tags', json.dumps(data))
+    r.publish('atlas_tags', data)
     return 0
 
 
