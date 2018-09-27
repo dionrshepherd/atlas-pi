@@ -13,24 +13,29 @@ def lambda_handler(event, context):
 
         anchor_id = record['dynamodb']['NewImage']['anchor']['S']
         tag_id = record['dynamodb']['NewImage']['tag']['S']
+        dist = float(record['dynamodb']['NewImage']['data']['M']['dist']['S'])
 
-        anchor = {
-            "id": anchor_id,
-            "dist": float(record['dynamodb']['NewImage']['data']['M']['dist']['S']),
-            "ts": record['dynamodb']['NewImage']['data']['M']['ts']['S']
-        }
-
-        try:
-            t_id = found_tags.index(tag_id)
-            tags[t_id]['anchors'].append(anchor)
-
-        except ValueError:
-            tag = {
-                "id": tag_id,
-                "anchors": [anchor]
+        # ignore negative numbers and 0 distances
+        if dist > 0.00:
+            anchor = {
+                "id": anchor_id,
+                "dist": float(record['dynamodb']['NewImage']['data']['M']['dist']['S']),
+                "ts": record['dynamodb']['NewImage']['data']['M']['ts']['S']
             }
-            tags.append(tag)
-            found_tags.append(tag_id)
+
+            try:
+                t_id = found_tags.index(tag_id)
+                tags[t_id]['anchors'].append(anchor)
+
+            except ValueError:
+                tag = {
+                    "id": tag_id,
+                    "anchors": [anchor]
+                }
+                tags.append(tag)
+                found_tags.append(tag_id)
+        else:
+            continue
 
     num_records = len(event['Records'])
     for tag in tags:
