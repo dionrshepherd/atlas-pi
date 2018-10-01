@@ -15,8 +15,9 @@ def lambda_handler(event, context):
         tag_id = record['dynamodb']['NewImage']['tag']['S']
         dist = float(record['dynamodb']['NewImage']['data']['M']['dist']['S'])
 
-        # ignore negative numbers and 0 distances
-        if dist > 0.00:
+        # ignore negative numbers, 0 distances and the defined primary tag
+        #
+        if (dist > 0.00 and anchor_id != 'primary'):
             anchor = {
                 "id": anchor_id,
                 "dist": float(record['dynamodb']['NewImage']['data']['M']['dist']['S']),
