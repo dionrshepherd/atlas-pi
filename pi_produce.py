@@ -27,6 +27,7 @@ def put_to_db(time_stamp, tag_id, distance, anchor_id):
             'data': payload
         }
     )
+    return
 
 
 print('...Opening serial port...')
@@ -66,7 +67,7 @@ try:
             print(str(time.time() - start_time))
             start_time = time.time()
             iter = 0
-        iter += 1
+
         timeStamp = time.time()
         data = ser.read()
         while data != b' ':
@@ -84,7 +85,8 @@ try:
         # print distances to debug
         # print(data[-4:])
 
-        # put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
+        put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
+        iter += 1
 
 except KeyboardInterrupt:
     print('...Closing...')
