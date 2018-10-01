@@ -59,7 +59,14 @@ ser.flushInput()
 # keep reading positions
 print('...Reading positions...')
 try:
+    start_time = time.time()
+    iter = 0
     while True:
+        if iter == 9:
+            print(str(time.time() - start_time))
+            start_time = time.time()
+            iter = 0
+        iter += 1
         timeStamp = time.time()
         data = ser.read()
         while data != b' ':
@@ -75,9 +82,9 @@ try:
             tagId = tagId[0:4]
 
         # print distances to debug
-        print(data[-4:])
+        # print(data[-4:])
 
-        put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
+        # put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
 
 except KeyboardInterrupt:
     print('...Closing...')
