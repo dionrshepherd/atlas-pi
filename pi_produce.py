@@ -80,9 +80,9 @@ try:
             tagId = tagId[0:4]
 
         # print distances to debug
-        print(data[-4:])
+        # print(data[-4:])
 
-        putToDB(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
+        # putToDB(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
 
 except KeyboardInterrupt:
     print('...Closing...')
