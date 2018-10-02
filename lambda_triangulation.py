@@ -32,7 +32,7 @@ def triangulate(anchors, tag):
     sum_of_inv = reduce(lambda x, y: x + (1 / y['dist']), anchors, 0)
 
     for a in anchors:
-        if a['id'] == 'C52A':
+        if a['id'] == '99A4':
             d = a['dist']
         dist_by_inv = a['dist'] / sum_of_inv
         tag_x += (positions[a['id']]['x'] / dist_by_inv)
