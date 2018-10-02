@@ -85,9 +85,11 @@ try:
 
         total_time += (time.time() - start_time)
         start_time = time.time()
+        n += 1
 
 except KeyboardInterrupt:
-    print(str(total_time/n))
+    if n > 0:
+        print(str(total_time / n))
     print('...Closing...')
     ser.write(b'\r\r')
     ser.readline()
