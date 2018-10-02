@@ -60,14 +60,8 @@ ser.flushInput()
 # keep reading positions
 print('...Reading positions...')
 try:
-    start_time = time.time()
-    iter = 0
     while True:
-        if iter == 9:
-            print(str(time.time() - start_time))
-            start_time = time.time()
-            iter = 0
-
+        start_time = time.time()
         timeStamp = time.time()
         data = ser.read()
         while data != b' ':
@@ -86,7 +80,9 @@ try:
         # print(data[-4:])
 
         put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
-        iter += 1
+
+        print(str(time.time() - start_time))
+        start_time = time.time()
 
 except KeyboardInterrupt:
     print('...Closing...')
