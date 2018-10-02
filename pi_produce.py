@@ -59,6 +59,8 @@ ser.flushInput()
 
 # keep reading positions
 print('...Reading positions...')
+n = 0
+total_time = 0
 try:
     while True:
         start_time = time.time()
@@ -77,14 +79,15 @@ try:
             tagId = tagId[0:4]
 
         # print distances to debug
-        # print(data[-4:])
+        print(data[-4:])
 
         put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
 
-        print(str(time.time() - start_time))
+        total_time += (time.time() - start_time)
         start_time = time.time()
 
 except KeyboardInterrupt:
+    print(str(total_time/n))
     print('...Closing...')
     ser.write(b'\r\r')
     ser.readline()
