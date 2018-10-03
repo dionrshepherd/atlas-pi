@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-export ANCHOR_ID="$(hostame)"
+export ANCHOR_ID="$(hostname)"
 echo $ANCHOR_ID
 
 #pip3 install setuptools
