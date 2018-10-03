@@ -2,8 +2,7 @@
 
 set -e
 
-cp ~/atlas-pi/.bashrc ~/
-source ~/.bashrc
+. ~/atlas-pi/.bashrc
 
 pip install setuptools
 pip install awscli
