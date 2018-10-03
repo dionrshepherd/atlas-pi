@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-
 set -e
 
-. ~/atlas-pi/.bashrc
+export ANCHOR_ID="$(hostame)"
+echo $ANCHOR_ID
 
-pip install setuptools
-pip install awscli
-pip install boto3
-pip install pyserial
+#pip3 install setuptools
+#pip3 install awscli
+#pip3 install boto3
+#pip3 install pyserial
