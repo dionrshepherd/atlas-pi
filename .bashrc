@@ -112,7 +112,5 @@ if ! shopt -oq posix; then
   fi
 fi
 
-export ANCHOR_ID='extremely long on purpose'
-
 alias py=python3
 alias pip=pip3
