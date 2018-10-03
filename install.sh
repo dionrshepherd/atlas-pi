@@ -3,6 +3,7 @@
 set -e
 
 cp ~/atlas-pi/.bashrc ~/
+source ~/.bashrc
 
 pip install awscli
 pip install boto3
