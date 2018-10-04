@@ -13,7 +13,7 @@ def lambda_handler(event, context):
         # in case we get an string that cannot be parsed
         try:
             dist = float(record['dynamodb']['NewImage']['data']['M']['dist']['S'])
-        except ValueError:
+        except ValueError or KeyError:
             continue
 
         anchor_id = record['dynamodb']['NewImage']['anchor']['S']
