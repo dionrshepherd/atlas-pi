@@ -1,7 +1,10 @@
 #!/usr/bin/env bash
 set -e
 
-echo "Have you sourced the env script first?"
+echo "Have you sourced the bash script?"
+# todo yes no command
+echo "source ./.bashrc"
+
 
 apt install python3-pip
 pip3 install setuptools
