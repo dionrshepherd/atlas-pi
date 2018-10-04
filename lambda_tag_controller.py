@@ -14,9 +14,14 @@ def lambda_handler(event, context):
         try:
             dist = float(record['dynamodb']['NewImage']['data']['M']['dist']['S'])
         except ValueError:
+            print('Error: Distance is not a number')
             continue
         except KeyError:
-            print(record['dynamodb'])
+            try:
+                dist = float(record['dynamodb']['Keys']['data']['M']['dist']['S'])
+            except:
+                print(record['dynamodb'])
+                continue
 
         anchor_id = record['dynamodb']['NewImage']['anchor']['S']
         tag_id = record['dynamodb']['NewImage']['tag']['S']

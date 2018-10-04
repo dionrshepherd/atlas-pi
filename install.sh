@@ -1,7 +1,9 @@
 #!/usr/bin/env bash
 set -e
 
-echo "Have you sourced the bash script?"
+echo "source ./.bashrc"
+echo "$ANCHOR_ID"
+# todo if the above is not of length 4 it is borked
 # todo yes no command
 echo "source ./.bashrc"
 
