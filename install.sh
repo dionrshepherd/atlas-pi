@@ -7,6 +7,7 @@ echo "$ANCHOR_ID"
 # todo yes no command
 echo "source ./.bashrc"
 
+# Todo copy the init script to the /etc/init.d
 
 apt install python3-pip
 pip3 install setuptools
