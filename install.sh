@@ -2,6 +2,7 @@
 set -e
 
 echo "source ./.bashrc"
+# edit bash script
 echo "$ANCHOR_ID"
 # todo if the above is not of length 4 it is borked
 # todo yes no command

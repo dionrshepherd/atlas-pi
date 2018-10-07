@@ -112,7 +112,7 @@ if ! shopt -oq posix; then
   fi
 fi
 
-export ANCHOR_ID='This hasnt been changed yet'
+export ANCHOR_ID=$hostname
 
 alias py=python3
 alias pip=pip3
