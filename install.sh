@@ -3,8 +3,10 @@ set -e
 
 # linaro@ip linaro
 # ``passwd
+# sudo su
 # /etc/hostname
 # /etc/hosts
+# /etc/init.d/hostname.sh start
 
 # username password and hostname
 echo "Has the user password and hostname been changed"
