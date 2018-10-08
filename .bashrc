@@ -113,6 +113,3 @@ if ! shopt -oq posix; then
 fi
 
 export ANCHOR_ID="$(hostname)"
-
-alias py=python3
-alias pip=pip3
