@@ -8,7 +8,7 @@ touch /var/lock/atlas-init.sh
 case "$1" in
   start)
     echo "Start reading distances"
-    py ~/atlas-pi/pi_produce.py
+    python3 ~/atlas-pi/pi_produce.py
     ;;
   stop)
     echo "Stop all running python scripts"
