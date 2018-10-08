@@ -7,6 +7,7 @@ set -e
 # /etc/hostname
 # /etc/hosts
 # /etc/init.d/hostname.sh start
+# reboot
 
 # username password and hostname
 echo "Has the user password and hostname been changed"
