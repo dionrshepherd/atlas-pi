@@ -2,11 +2,11 @@
 set -e
 
 # username password and hostname
-echo "Has the user password and hostname been changed"
+echo "Has the user password, root password and hostname been changed"
 # TODO: yes/no prompt here
 
 # install all libraries needed
-sudo apt update
+#sudo apt update
 sudo apt -y install python3-pip file-rc
 pip3 install setuptools
 pip3 install awscli==1.11.18
