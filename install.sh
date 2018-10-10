@@ -27,7 +27,7 @@ cp .bashrc ../
 #sudo update-rc.d atlas-init.sh defaults
 
 # configure the aws creds
-echo "run: ./.local/bin/aws configure"
+echo "run: ~/.local/bin/aws configure"
 
 # reboot to set everything running
 echo "lastly reboot"
