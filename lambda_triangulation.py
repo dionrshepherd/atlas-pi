@@ -5,27 +5,33 @@ import numpy as np
 import itertools
 
 r = redis.StrictRedis(host='atlas-pubsub-dev.poxwmo.ng.0001.apse2.cache.amazonaws.com', port=6379, db=0)
+# positions = {
+#     "99A4": {
+#         "x": 4.00,
+#         "y": 7.50,
+#         "z": 1
+#     },
+#     "CBB5": {
+#         "x": 4.00,
+#         "y": 4.00,
+#         "z": 1
+#     },
+#     "8986": {
+#         "x": 10.54,
+#         "y": 7.50,
+#         "z": 1
+#     },
+#     "9895": {
+#         "x": 10.54,
+#         "y": 4.00,
+#         "z": 1
+#     }
+# }
 positions = {
-    "99A4": {
-        "x": 4.00,
-        "y": 7.50,
-        "z": 1
-    },
-    "CBB5": {
-        "x": 4.00,
-        "y": 4.00,
-        "z": 1
-    },
-    "8986": {
-        "x": 10.54,
-        "y": 7.50,
-        "z": 1
-    },
-    "9895": {
-        "x": 10.54,
-        "y": 4.00,
-        "z": 1
-    }
+    "99A4": [4.00, 7.5, 5.30],
+    "CBB5": [4.00, 4.00, 5.30],
+    "8986": [10.54, 7.50, 5.30],
+    "9895": [10.54, 4.00, 5.30]
 }
 
 
@@ -38,9 +44,9 @@ def calc_dist(p0, p1):
 
 # Given three intersecting spheres, find the two points of intersection
 def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
-    anchor0_mod = anchor0 - anchor0
-    anchor1_mod = anchor1 - anchor0
-    anchor2_mod = anchor2 - anchor0
+    anchor0_mod = np.subtract(anchor0, anchor0)
+    anchor1_mod = np.subtract(anchor1, anchor0)
+    anchor2_mod = np.subtract(anchor2, anchor0)
 
     e_x = (anchor1_mod - anchor0_mod) / calc_dist(anchor0_mod, anchor1_mod)
     i = np.sum(e_x * (anchor2_mod - anchor0_mod))
@@ -63,14 +69,16 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
 
 def triangulate(anchors, tag_id):
     # Find all possible singal points based on trilateration
-    a0 = positions[anchors[0]['id']]
+
+    a0 = np.array(positions[anchors[0]['id']])
     r0 = anchors[0]['dist']
-    a1 = positions[anchors[1]['id']]
+    a1 = np.array(positions[anchors[1]['id']])
     r1 = anchors[1]['dist']
-    a2 = positions[anchors[2]['id']]
+    a2 = np.array(positions[anchors[2]['id']])
     r2 = anchors[2]['dist']
-    a3 = positions[anchors[3]['id']]
+    a3 = np.array(positions[anchors[3]['id']])
     r3 = anchors[3]['dist']
+
     trianchors = itertools.combinations([(a0, r0), (a1, r1), (a2, r2), (a3, r3)], 3)
     candidates = [trilateration(B[0][0], B[0][1], B[1][0], B[1][1], B[2][0], B[2][1]) for B in trianchors]
 
