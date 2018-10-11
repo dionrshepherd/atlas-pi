@@ -57,10 +57,10 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
     anchor1_mod = np.array((np.sum(anchor1_mod*e_x), np.sum(anchor1_mod*e_y), np.sum(anchor1_mod*e_z)))
     anchor2_mod = np.array((np.sum(anchor2_mod*e_x), np.sum(anchor2_mod*e_y), np.sum(anchor2_mod*e_z)))
 
-    print('mods')
-    print(anchor0_mod)
-    print(anchor1_mod)
-    print(anchor2_mod)
+    # print('mods')
+    # print(anchor0_mod)
+    # print(anchor1_mod)
+    # print(anchor2_mod)
 
     x = (r0**2 - r1**2 + anchor1_mod[0]**2) / (2 * anchor1_mod[0])
     y = ((r0**2 - r2**2 + anchor2_mod[0]**2 + anchor2_mod[1]**2) / (2 * anchor2_mod[1])) - ((x * anchor2_mod[0]) / anchor2_mod[1])
@@ -74,6 +74,8 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
 
 def triangulate(anchors, tag_id):
     # Find all possible singal points based on trilateration
+    print('anchors')
+    print(anchors)
 
     a0 = np.array(positions[anchors[0]['id']])
     r0 = anchors[0]['dist']
@@ -83,11 +85,16 @@ def triangulate(anchors, tag_id):
     r2 = anchors[2]['dist']
     a3 = np.array(positions[anchors[3]['id']])
     r3 = anchors[3]['dist']
+    print('anchor arr')
+    print(a0)
+    print(a1)
+    print(a2)
+    print(a3)
 
     trianchors = itertools.combinations([(a0, r0), (a1, r1), (a2, r2), (a3, r3)], 3)
     candidates = [trilateration(B[0][0], B[0][1], B[1][0], B[1][1], B[2][0], B[2][1]) for B in trianchors]
-    print('cands')
-    print(candidates)
+    # print('cands')
+    # print(candidates)
 
     # calculate
     votes = np.zeros((len(candidates), 2))
