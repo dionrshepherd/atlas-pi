@@ -48,9 +48,9 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
     anchor1_mod = np.subtract(anchor1, anchor0)
     anchor2_mod = np.subtract(anchor2, anchor0)
 
-    e_x = (anchor1_mod - anchor0_mod) / calc_dist(anchor0_mod, anchor1_mod)
-    i = np.sum(e_x * (anchor2_mod - anchor0_mod))
-    e_y = (anchor2_mod - anchor0_mod - i*e_x) / calc_dist(anchor2_mod - anchor0_mod, i*e_x)
+    e_x = (np.subtract(anchor1_mod, anchor0_mod)) / calc_dist(anchor0_mod, anchor1_mod)
+    i = np.sum(e_x * (np.subtract(anchor2_mod, anchor0_mod)))
+    e_y = (np.subtract(anchor2_mod, anchor0_mod) - i*e_x) / calc_dist(np.subtract(anchor2_mod, anchor0_mod), i*e_x)
     e_z = np.array((e_x[1]*e_y[2] - e_x[2]*e_y[1], e_x[2]*e_y[0] - e_x[0]*e_y[2], e_x[0]*e_y[1] - e_x[1]*e_y[0]))
 
     anchor0_mod = np.array((np.sum(anchor0_mod*e_x), np.sum(anchor0_mod*e_y), np.sum(anchor0_mod*e_z)))
