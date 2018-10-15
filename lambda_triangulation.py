@@ -217,9 +217,9 @@ def triangulate(anchors, tag_id):
 
     data = {
         "tag": tag_id,
-        "x": pos_mean[0],
-        "y": pos_mean[1],
-        "z": pos_mean[2]
+        "x": str(pos_mean[0]),
+        "y": str(pos_mean[1]),
+        "z": str(pos_mean[2])
     }
     r.publish('atlas_tags', data)
     sns_client.publish(
