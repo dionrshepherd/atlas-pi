@@ -21,47 +21,23 @@ def lambda_handler(event, context):
             response = table.scan(
                 FilterExpression=Attr('tag').eq(tag_id)
             )
-            anchors = response['Items']
-            for a in anchors:
-                if a['anchor'] == '99A4':
-                    a11 = float(a['data']['dist'])
-                    a12 = a['data']['ts']
-                if a['anchor'] == 'CBB5':
-                    a21 = float(a['data']['dist'])
-                    a22 = a['data']['ts']
-                if a['anchor'] == '8986':
-                    a31 = float(a['data']['dist'])
-                    a32 = a['data']['ts']
-                if a['anchor'] == '9895':
-                    a41 = float(a['data']['dist'])
-                    a42 = a['data']['ts']
 
+            anchors = []
+            items = response['Items']
+
+            for i in items:
+                anchors.append({
+                    "id": i['anchor'],
+                    "dist": float(i['data']['dist']),
+                    "ts": i['data']['ts']
+                })
             tag = {
                 "id": tag_id,
-                "anchors": [
-                    {
-                        "id": '99A4',
-                        "dist": a11,
-                        "ts": a12
-                    },
-                    {
-                        "id": 'CBB5',
-                        "dist": a21,
-                        "ts": a22
-                    },
-                    {
-                        "id": '8986',
-                        "dist": a31,
-                        "ts": a32
-                    },
-                    {
-                        "id": '9895',
-                        "dist": a41,
-                        "ts": a42
-                    }
-                ]
+                "anchors": anchors
             }
+            # debug
             print(tag)
+
             found_tags.append(tag_id)
             sns_client.publish(
                 TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-lambda',
