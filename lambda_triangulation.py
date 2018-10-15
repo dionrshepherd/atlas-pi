@@ -217,14 +217,14 @@ def triangulate(anchors, tag_id):
 
     data = {
         "tag": tag_id,
-        "x": str(pos_mean[0]),
-        "y": str(pos_mean[1]),
-        "z": str(pos_mean[2])
+        "x": pos_mean[0],
+        "y": pos_mean[1],
+        "z": pos_mean[2]
     }
     r.publish('atlas_tags', data)
     sns_client.publish(
         TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
-        Message= data
+        Message=json.dumps(data)
     )
     return 0
 
