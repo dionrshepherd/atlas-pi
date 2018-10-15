@@ -4,8 +4,10 @@ import redis
 import numpy as np
 import itertools
 import math
+import boto3
 
 r = redis.StrictRedis(host='atlas-pubsub-dev.poxwmo.ng.0001.apse2.cache.amazonaws.com', port=6379, db=0)
+sns_client = boto3.client('sns')
 positions = {
     "99A4": [4.00, 7.5, 5.30],
     "CBB5": [4.00, 4.00, 5.30],
@@ -216,6 +218,10 @@ def triangulate(anchors, tag_id):
         "position": np.mean(selections, axis=0)
     }
     r.publish('atlas_tags', data)
+    sns_client.publish(
+        TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
+        Message=json.dumps(data)
+    )
     return 0
 
 
