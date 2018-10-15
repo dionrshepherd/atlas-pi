@@ -213,14 +213,14 @@ def triangulate(anchors, tag_id):
         else:
             selections.append(np.mean(candidates[i], 0))
 
-    positions = np.mean(selections, axis=0)
+    pos_mean = np.mean(selections, axis=0)
 
     data = {
         "tag": tag_id,
         "position": {
-            "x": positions[0],
-            "y": positions[1],
-            "z": positions[2]
+            "x": pos_mean[0],
+            "y": pos_mean[1],
+            "z": pos_mean[2]
         }
     }
     r.publish('atlas_tags', data)
