@@ -1,13 +1,13 @@
 # instance of a single tags seen anchors and distances
 import json
-import redis
 import numpy as np
 import itertools
 import math
 import boto3
 
-r = redis.StrictRedis(host='atlas-pubsub-dev.poxwmo.ng.0001.apse2.cache.amazonaws.com', port=6379, db=0)
 sns_client = boto3.client('sns')
+iot_data_client = boto3.client('iot-data')
+# TODO: get positions from db
 positions = {
     "99A4": [4.00, 7.5, 5.30],
     "CBB5": [4.00, 4.00, 5.30],
@@ -221,7 +221,13 @@ def triangulate(anchors, tag_id):
         "y": pos_mean[1],
         "z": pos_mean[2]
     }
-    r.publish('atlas_tags', data)
+
+    response = iot_data_client.publish(
+        endpoint='agmpss1et7wdl.iot.ap-southeast-2.amazonaws.com',
+        topic='atlasDevTagCoords',
+        payload=json.dumps(data)
+    )
+    print(response)
     sns_client.publish(
         TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
         Message=json.dumps(data)
