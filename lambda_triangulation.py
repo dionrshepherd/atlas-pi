@@ -227,7 +227,7 @@ def triangulate(anchors, tag_id):
     print(data)
 
     response = iot_data_client.publish(
-        topic='/atlasDevTagCoords',
+        topic='atlasDevTagCoords',
         payload=json.dumps(data)
     )
 
