@@ -5,8 +5,9 @@ import itertools
 import math
 import boto3
 
-sns_client = boto3.client('sns')
-iot_data_client = boto3.client('iot-data')
+aws_region = 'ap-southeast-2'
+sns_client = boto3.client('sns', region=aws_region)
+iot_data_client = boto3.client('iot-data', region=aws_region)
 # TODO: get positions from db
 positions = {
     "99A4": [1.0, 15.5, 3.7],
