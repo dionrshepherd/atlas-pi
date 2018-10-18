@@ -5,9 +5,13 @@ import itertools
 import math
 import boto3
 
-
-sns_client = boto3.client('sns', region_name='ap-southeast-2')
-iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
+session = boto3.Session(
+    aws_access_key_id='',
+    aws_secret_access_key='',
+    region_name='ap-southeast-2'
+)
+sns_client = session.client('sns', region_name='ap-southeast-2')
+iot_data_client = session.client('iot-data', region_name='ap-southeast-2')
 # TODO: get positions from db
 positions = {
     "99A4": [1.0, 15.5, 3.7],
@@ -17,6 +21,11 @@ positions = {
     "422F": [7.2, 6.0, 3.6],
     "9895": [1.0, 23.0, 3.7]
 }
+
+response = iot_data_client.publish(
+    topic='/atlasDevTagCoords',
+    payload=json.dumps(positions)
+)
 
 
 ## Circle class; used for finding the intersection points of two circles
@@ -239,8 +248,29 @@ def triangulate(anchors, tag_id):
 
 def lambda_handler(event, context):
     data = json.loads(event['Records'][0]['Sns']['Message'])
-    tag_id = data['id']
-    anchors = data['anchors']
+    tag_id = data['id'] = 'AAAA'
+    anchors = data['anchors'] = [
+        {
+            "id": '99A4',
+            "dist": 6.8,
+            "ts": 12345
+        },
+        {
+            "id": '1123',
+            "dist": 3.8,
+            "ts": 12345
+        },
+        {
+            "id": 'CBB5',
+            "dist": 8.3,
+            "ts": 12345
+        },
+        {
+            "id": '422F',
+            "dist": 6.6,
+            "ts": 12345
+        },
+    ]
 
     a_len = len(anchors)
     if a_len < 4:
