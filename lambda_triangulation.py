@@ -6,7 +6,7 @@ import math
 import boto3
 
 boto3.set_stream_logger('')
-sns_client = boto3.client('sns', region_name='ap-southeast-2')
+# sns_client = boto3.client('sns', region_name='ap-southeast-2')
 iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
 # TODO: get positions from db
 positions = {
@@ -232,10 +232,10 @@ def triangulate(anchors, tag_id):
     )
 
     print(response)
-    sns_client.publish(
-        TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
-        Message=json.dumps(data)
-    )
+    # sns_client.publish(
+    #     TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
+    #     Message=json.dumps(data)
+    # )
     return 0
 
 
