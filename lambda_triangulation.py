@@ -223,11 +223,11 @@ def triangulate(anchors, tag_id):
         "y": pos_mean[1],
         "z": pos_mean[2]
     }
-
     response = iot_data_client.publish(
-        topic='atlasDevTagCoords',
+        topic='/atlasDevTagCoords',
         payload=json.dumps(data)
     )
+
     print(response)
     sns_client.publish(
         TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
