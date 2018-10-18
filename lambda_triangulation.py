@@ -17,6 +17,11 @@ positions = {
     "9895": [1.0, 23.0, 3.7]
 }
 
+response = iot_data_client.publish(
+    topic='/atlasDevTagCoords',
+    payload=json.dumps(positions)
+)
+
 
 ## Circle class; used for finding the intersection points of two circles
 class Circle(object):
