@@ -5,13 +5,9 @@ import itertools
 import math
 import boto3
 
-session = boto3.Session(
-    aws_access_key_id='',
-    aws_secret_access_key='',
-    region_name='ap-southeast-2'
-)
-sns_client = session.client('sns')
-iot_data_client = session.client('iot-data')
+
+sns_client = boto3.client('sns', region_name='ap-southeast-2')
+iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
 # TODO: get positions from db
 positions = {
     "99A4": [1.0, 15.5, 3.7],
@@ -21,11 +17,6 @@ positions = {
     "422F": [7.2, 6.0, 3.6],
     "9895": [1.0, 23.0, 3.7]
 }
-
-response = iot_data_client.publish(
-    topic='/atlasDevTagCoords',
-    payload=json.dumps(positions)
-)
 
 
 ## Circle class; used for finding the intersection points of two circles
