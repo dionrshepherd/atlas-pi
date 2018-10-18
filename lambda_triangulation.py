@@ -225,7 +225,6 @@ def triangulate(anchors, tag_id):
     }
 
     response = iot_data_client.publish(
-        endpoint='agmpss1et7wdl.iot.ap-southeast-2.amazonaws.com',
         topic='atlasDevTagCoords',
         payload=json.dumps(data)
     )
