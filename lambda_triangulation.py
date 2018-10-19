@@ -5,8 +5,8 @@ import itertools
 import math
 import boto3
 
-boto3.set_stream_logger('')
-# sns_client = boto3.client('sns', region_name='ap-southeast-2')
+
+sns_client = boto3.client('sns', region_name='ap-southeast-2')
 iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
 # TODO: get positions from db
 positions = {
@@ -90,6 +90,8 @@ def sphere_intersect(anchorA, rA, anchorB, rB, r0, r1):
 
 def find_two_closest(pointsA, pointsB):
     dist0 = calc_dist(pointsA[0], pointsB[0])
+    print(pointsA[0])
+    print(pointsB[0])
     dist1 = calc_dist(pointsA[1], pointsB[0])
     dist2 = calc_dist(pointsA[0], pointsB[1])
     dist3 = calc_dist(pointsA[1], pointsB[1])
@@ -224,18 +226,16 @@ def triangulate(anchors, tag_id):
         "y": pos_mean[1],
         "z": pos_mean[2]
     }
-    print(data)
 
-    response = iot_data_client.publish(
+    iot_data_client.publish(
         topic='atlasDevTagCoords',
         payload=json.dumps(data)
     )
 
-    print(response)
-    # sns_client.publish(
-    #     TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
-    #     Message=json.dumps(data)
-    # )
+    sns_client.publish(
+        TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
+        Message=json.dumps(data)
+    )
     return 0
 
 
@@ -243,14 +243,16 @@ def lambda_handler(event, context):
     data = json.loads(event['Records'][0]['Sns']['Message'])
     tag_id = data['id']
     anchors = data['anchors']
-
+    print()
     a_len = len(anchors)
     if a_len < 4:
         print('not enough anchor points for accurate triangulation')
         return
     else:
         if a_len == 4:
+            print(anchors)
             triangulate(anchors, tag_id)
         else:
             anchors.sort(key=lambda x: x['ts'], reverse=True)
+            print(anchors)
             triangulate(anchors[0:4], tag_id)
