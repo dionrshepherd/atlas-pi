@@ -8,12 +8,9 @@ import boto3
 
 sns_client = boto3.client('sns', region_name='ap-southeast-2')
 iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
-ddb_client = boto3.client('dynamodb')
-ddb_resource = boto3.resource('dynamodb')
-anchor_table = 'atlas_dev_anchor_location'
-ddb_client_table = ddb_client.Table(anchor_table)
-print(ddb_client.scan(TableName=anchor_table))
-print(ddb_client_table.scan())
+db_resource = boto3.resource('dynamodb')
+table = db_resource.Table('atlas_dev_anchor_location')
+print(table.scan())
 
 # TODO: get positions from db
 positions = {
