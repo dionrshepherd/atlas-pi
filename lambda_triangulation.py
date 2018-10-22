@@ -8,6 +8,13 @@ import boto3
 
 sns_client = boto3.client('sns', region_name='ap-southeast-2')
 iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
+ddb_client = boto3.client('dynamodb')
+ddb_resource = boto3.resource('dynamodb')
+anchor_table = 'atlas_dev_anchor_location'
+ddb_client_table = ddb_client.Table(anchor_table)
+print(ddb_client.scan(TableName=anchor_table))
+print(ddb_client_table.scan())
+
 # TODO: get positions from db
 positions = {
     "99A4": [1.0, 15.5, 3.7],
@@ -222,9 +229,9 @@ def triangulate(anchors, tag_id):
 
     data = {
         "tag": tag_id,
-        "x": pos_mean[0],
-        "y": pos_mean[1],
-        "z": pos_mean[2]
+        "x": pos_mean[0] - 1,
+        "y": pos_mean[1] - 1,
+        "z": pos_mean[2] - 1
     }
 
     iot_data_client.publish(
@@ -232,10 +239,11 @@ def triangulate(anchors, tag_id):
         payload=json.dumps(data)
     )
 
-    sns_client.publish(
-        TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
-        Message=json.dumps(data)
-    )
+    # turn off for debugging
+    # sns_client.publish(
+    #     TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
+    #     Message=json.dumps(data)
+    # )
     return 0
 
 

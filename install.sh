@@ -7,7 +7,7 @@ echo "Has the user password, root password and hostname been changed"
 
 # install all libraries needed
 sudo apt update
-sudo apt -y install python3-pip
+sudo apt -y install python3-pip screen
 pip3 install setuptools
 pip3 install awscli==1.11.18
 pip3 install boto3
