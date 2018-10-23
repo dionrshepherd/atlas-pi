@@ -94,8 +94,6 @@ def sphere_intersect(anchorA, rA, anchorB, rB, r0, r1):
 
 def find_two_closest(pointsA, pointsB):
     dist0 = calc_dist(pointsA[0], pointsB[0])
-    print(pointsA[0])
-    print(pointsB[0])
     dist1 = calc_dist(pointsA[1], pointsB[0])
     dist2 = calc_dist(pointsA[0], pointsB[1])
     dist3 = calc_dist(pointsA[1], pointsB[1])
@@ -248,16 +246,13 @@ def lambda_handler(event, context):
     data = json.loads(event['Records'][0]['Sns']['Message'])
     tag_id = data['id']
     anchors = data['anchors']
-    print()
     a_len = len(anchors)
     if a_len < 4:
         print('not enough anchor points for accurate triangulation')
         return
     else:
         if a_len == 4:
-            print(anchors)
             triangulate(anchors, tag_id)
         else:
             anchors.sort(key=lambda x: x['ts'], reverse=True)
-            print(anchors)
             triangulate(anchors[0:4], tag_id)
