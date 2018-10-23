@@ -257,7 +257,11 @@ def lambda_handler(event, context):
     response = table.scan(Select='ALL_ATTRIBUTES')
     anchor_positions = {}
     for i in response['Items']:
-        anchor_positions[i['anchorId']] = i['coords']
+        coords = []
+        coords[0] = float(i['coords'][0])
+        coords[1] = float(i['coords'][1])
+        coords[2] = float(i['coords'][2])
+        anchor_positions[i['anchorId']] = coords
 
     print(anchor_positions)
 
