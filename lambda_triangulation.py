@@ -258,9 +258,9 @@ def lambda_handler(event, context):
     anchor_positions = {}
     for i in response['Items']:
         coords = []
-        coords[0] = float(i['coords'][0])
-        coords[1] = float(i['coords'][1])
-        coords[2] = float(i['coords'][2])
+        coords.append(float(i['coords'][0]))
+        coords.append(float(i['coords'][1]))
+        coords.append(float(i['coords'][2]))
         anchor_positions[i['anchorId']] = coords
 
     print(anchor_positions)
