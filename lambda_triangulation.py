@@ -234,11 +234,10 @@ def triangulate(anchors, tag_id):
         payload=json.dumps(data)
     )
 
-    # turn off for debugging
-    # sns_client.publish(
-    #     TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
-    #     Message=json.dumps(data)
-    # )
+    sns_client.publish(
+        TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
+        Message=json.dumps(data)
+    )
     return 0
 
 
