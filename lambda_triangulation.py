@@ -10,8 +10,6 @@ sns_client = boto3.client('sns', region_name='ap-southeast-2')
 iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
 db_resource = boto3.resource('dynamodb')
 table = db_resource.Table('atlas_dev_anchor_location')
-response = table.scan(Select='ALL_ATTRIBUTES')
-print(response)
 
 # TODO: get positions from db
 positions = {
@@ -169,6 +167,7 @@ def triangulate(anchors, tag_id):
     candidates = []
     selections = []
     for B in trianchors:
+        print(B)
         trilat = trilateration(B[0][0], B[0][1], B[1][0], B[1][1], B[2][0], B[2][1])
         if len(trilat) == 0:
             continue
@@ -244,6 +243,9 @@ def triangulate(anchors, tag_id):
 
 
 def lambda_handler(event, context):
+    response = table.scan(Select='ALL_ATTRIBUTES')
+    print(response)
+
     data = json.loads(event['Records'][0]['Sns']['Message'])
     tag_id = data['id']
     anchors = data['anchors']

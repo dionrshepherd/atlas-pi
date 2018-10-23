@@ -26,9 +26,14 @@ def lambda_handler(event, context):
             items = response['Items']
 
             for i in items:
+                try:
+                    item_dist = float(i['data']['dist'])
+                except(ValueError):
+                    print("Value error: " + i['data']['dist'])
+                    continue
                 anchors.append({
                     "id": i['anchor'],
-                    "dist": float(i['data']['dist']),
+                    "dist": item_dist,
                     "ts": i['data']['ts']
                 })
             tag = {
