@@ -141,6 +141,12 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
         p0_1 = np.array(c0.circle_intersect(c1)[0:2])
         p0_2 = np.array(c0.circle_intersect(c2)[0:2])
         p1_2 = np.array(c1.circle_intersect(c2)[0:2])
+        print('p0_1')
+        print(p0_1)
+        print('p0_2')
+        print(p0_2)
+        print('p1_2')
+        print(p1_2)
         closest01_02 = find_two_closest(p0_1, p0_2)
         closest01_12 = find_two_closest(p0_1, p1_2)
         p0 = p0_1[closest01_02[0]]
@@ -167,7 +173,6 @@ def triangulate(anchors, tag_id):
     candidates = []
     selections = []
     for B in trianchors:
-        print(B)
         trilat = trilateration(B[0][0], B[0][1], B[1][0], B[1][1], B[2][0], B[2][1])
         if len(trilat) == 0:
             continue
@@ -222,6 +227,9 @@ def triangulate(anchors, tag_id):
 
     pos_mean = np.mean(selections, axis=0)
 
+    print('pos_mean: ')
+    print(pos_mean)
+
     data = {
         "tag": tag_id,
         "x": pos_mean[0] - 1,
@@ -242,10 +250,17 @@ def triangulate(anchors, tag_id):
 
 
 def lambda_handler(event, context):
-    response = table.scan(Select='ALL_ATTRIBUTES')
-    print(response)
-
+    # get tags and anchors
     data = json.loads(event['Records'][0]['Sns']['Message'])
+
+    # get anchor positions
+    response = table.scan(Select='ALL_ATTRIBUTES')
+    anchor_positions = {}
+    for i in response['Items']:
+        anchor_positions[i['anchorId']] = i['coords']
+
+    print(anchor_positions)
+
     tag_id = data['id']
     anchors = data['anchors']
     a_len = len(anchors)
