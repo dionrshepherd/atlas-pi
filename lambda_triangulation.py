@@ -132,15 +132,19 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
         p1 = anchor0 + x*e_x + y*e_y + z_neg*e_z
         return([p0, p1])
     else:
+        print('r0')
+        print(r0)
+        print('r1')
+        print(r1)
+        print('r2')
+        print(r2)
+        print('anchor1_mod')
+        print(anchor1_mod)
+        print('anchor2_mod')
+        print(anchor2_mod)
         c0 = Circle(0, 0, r0)
         c1 = Circle(anchor1_mod[0], 0, r1)
         c2 = Circle(anchor2_mod[0], anchor2_mod[1], r2)
-        print('c0')
-        print(c0)
-        print('c1')
-        print(c1)
-        print('c2')
-        print(c2)
         p0_1 = np.array(c0.circle_intersect(c1)[0:2])
         p0_2 = np.array(c0.circle_intersect(c2)[0:2])
         p1_2 = np.array(c1.circle_intersect(c2)[0:2])
@@ -222,6 +226,8 @@ def triangulate(anchors, tag_id, positions):
         else:
             selections.append(np.mean(candidates[i], 0))
 
+    print('selections')
+    print(selections)
     pos_mean = np.mean(selections, axis=0)
     print('pos_mean')
     print(pos_mean)
@@ -272,9 +278,7 @@ def lambda_handler(event, context):
         return
     else:
         if a_len == 4:
-            print(anchors)
             triangulate(anchors, tag_id, anchor_positions)
         else:
             anchors.sort(key=lambda x: x['ts'], reverse=True)
-            print(anchors[0:4])
             triangulate(anchors[0:4], tag_id, anchor_positions)
