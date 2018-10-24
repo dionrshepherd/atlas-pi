@@ -15,6 +15,10 @@ def lambda_handler(event, context):
     for record in event['Records']:
         tag_id = record['dynamodb']['Keys']['tag']['S']
 
+        if tag_id == 'CC18':
+            print('Skipping Primary Tag')
+            continue
+
         if tag_id in str(found_tags):
             continue
         else:

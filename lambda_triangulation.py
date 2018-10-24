@@ -11,16 +11,6 @@ iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
 db_resource = boto3.resource('dynamodb')
 table = db_resource.Table('atlas_dev_anchor_location')
 
-# TODO: get positions from db
-positions = {
-    "99A4": [1.0, 15.5, 3.7],
-    "CBB5": [1.5, 5.5, 3.6],
-    "8986": [7.3, 23.9, 3.7],
-    "1123": [7.4, 16.0, 3.6],
-    "422F": [7.2, 6.0, 3.6],
-    "9895": [1.0, 23.0, 3.7]
-}
-
 
 ## Circle class; used for finding the intersection points of two circles
 class Circle(object):
@@ -141,12 +131,6 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
         p0_1 = np.array(c0.circle_intersect(c1)[0:2])
         p0_2 = np.array(c0.circle_intersect(c2)[0:2])
         p1_2 = np.array(c1.circle_intersect(c2)[0:2])
-        print('p0_1')
-        print(p0_1)
-        print('p0_2')
-        print(p0_2)
-        print('p1_2')
-        print(p1_2)
         closest01_02 = find_two_closest(p0_1, p0_2)
         closest01_12 = find_two_closest(p0_1, p1_2)
         p0 = p0_1[closest01_02[0]]
@@ -157,7 +141,7 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
         return(ave_point)
 
 
-def triangulate(anchors, tag_id):
+def triangulate(anchors, tag_id, positions):
     # Find all possible singal points based on trilateration
     a0 = np.array(positions[anchors[0]['id']])
     r0 = anchors[0]['dist']
@@ -227,9 +211,6 @@ def triangulate(anchors, tag_id):
 
     pos_mean = np.mean(selections, axis=0)
 
-    print('pos_mean: ')
-    print(pos_mean)
-
     data = {
         "tag": tag_id,
         "x": pos_mean[0] - 1,
@@ -239,6 +220,11 @@ def triangulate(anchors, tag_id):
 
     iot_data_client.publish(
         topic='atlasDevTagCoords',
+        payload=json.dumps(data)
+    )
+
+    iot_data_client.publish(
+        topic='atlasTag' + tag_id + 'Coords',
         payload=json.dumps(data)
     )
 
@@ -262,7 +248,6 @@ def lambda_handler(event, context):
         coords.append(float(i['coords'][1]))
         coords.append(float(i['coords'][2]))
         anchor_positions[i['anchorId']] = coords
-
     print(anchor_positions)
 
     tag_id = data['id']
@@ -273,7 +258,7 @@ def lambda_handler(event, context):
         return
     else:
         if a_len == 4:
-            triangulate(anchors, tag_id)
+            triangulate(anchors, tag_id, anchor_positions)
         else:
             anchors.sort(key=lambda x: x['ts'], reverse=True)
-            triangulate(anchors[0:4], tag_id)
+            triangulate(anchors[0:4], tag_id, anchor_positions)

@@ -15,6 +15,9 @@ table = dynamodb.Table('atlas_dev')
 
 
 def put_to_db(time_stamp, tag_id, distance, anchor_id):
+    if tag_id == 'CC18':
+        return
+
     payload = {
         'ts': str(time_stamp),
         'dist': distance,
