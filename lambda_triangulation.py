@@ -4,6 +4,7 @@ import numpy as np
 import itertools
 import math
 import boto3
+import time
 
 
 sns_client = boto3.client('sns', region_name='ap-southeast-2')
@@ -215,7 +216,7 @@ def triangulate(anchors, tag_id, positions):
         "tag": tag_id,
         "x": pos_mean[0] - 1,
         "y": pos_mean[1] - 1,
-        "z": pos_mean[2] - 1
+        "z": time.time()
     }
 
     iot_data_client.publish(
