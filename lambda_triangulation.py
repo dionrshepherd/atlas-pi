@@ -83,19 +83,25 @@ def sphere_intersect(anchorA, rA, anchorB, rB, r0, r1):
 
 
 def find_two_closest(pointsA, pointsB):
-    dist0 = calc_dist(pointsA[0], pointsB[0])
-    dist1 = calc_dist(pointsA[1], pointsB[0])
-    dist2 = calc_dist(pointsA[0], pointsB[1])
-    dist3 = calc_dist(pointsA[1], pointsB[1])
-    min_dist = min(dist0, dist1, dist2, dist3)
-    if min_dist == dist0:
-        return([0, 0])
-    elif min_dist == dist1:
-        return([1, 0])
-    elif min_dist == dist2:
-        return([0, 1])
-    else:
-        return([1, 1])
+    try:
+        dist0 = calc_dist(pointsA[0], pointsB[0])
+        dist1 = calc_dist(pointsA[1], pointsB[0])
+        dist2 = calc_dist(pointsA[0], pointsB[1])
+        dist3 = calc_dist(pointsA[1], pointsB[1])
+        min_dist = min(dist0, dist1, dist2, dist3)
+        if min_dist == dist0:
+            return([0, 0])
+        elif min_dist == dist1:
+            return([1, 0])
+        elif min_dist == dist2:
+            return([0, 1])
+        else:
+            return([1, 1])
+    except IndexError:
+        print('pointsA')
+        print(pointsA)
+        print('pointsB')
+        print(pointsB)
 
 
 # Given three intersecting spheres, find the two points of intersection
@@ -129,6 +135,12 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
         c0 = Circle(0, 0, r0)
         c1 = Circle(anchor1_mod[0], 0, r1)
         c2 = Circle(anchor2_mod[0], anchor2_mod[1], r2)
+        print('c0')
+        print(c0)
+        print('c1')
+        print(c1)
+        print('c2')
+        print(c2)
         p0_1 = np.array(c0.circle_intersect(c1)[0:2])
         p0_2 = np.array(c0.circle_intersect(c2)[0:2])
         p1_2 = np.array(c1.circle_intersect(c2)[0:2])
@@ -211,6 +223,8 @@ def triangulate(anchors, tag_id, positions):
             selections.append(np.mean(candidates[i], 0))
 
     pos_mean = np.mean(selections, axis=0)
+    print('pos_mean')
+    print(pos_mean)
 
     data = {
         "tag": tag_id,
@@ -249,7 +263,6 @@ def lambda_handler(event, context):
         coords.append(float(i['coords'][1]))
         coords.append(float(i['coords'][2]))
         anchor_positions[i['anchorId']] = coords
-    print(anchor_positions)
 
     tag_id = data['id']
     anchors = data['anchors']
@@ -259,7 +272,9 @@ def lambda_handler(event, context):
         return
     else:
         if a_len == 4:
+            print(anchors)
             triangulate(anchors, tag_id, anchor_positions)
         else:
             anchors.sort(key=lambda x: x['ts'], reverse=True)
+            print(anchors[0:4])
             triangulate(anchors[0:4], tag_id, anchor_positions)

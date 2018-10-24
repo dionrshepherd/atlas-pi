@@ -12,12 +12,10 @@ print('...Anchor ID: ' + anchorId + '...')
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('atlas_dev')
+init_tag = 'CC18'
 
 
 def put_to_db(time_stamp, tag_id, distance, anchor_id):
-    if tag_id == 'CC18':
-        return
-
     payload = {
         'ts': str(time_stamp),
         'dist': distance,
@@ -79,9 +77,10 @@ try:
             tagId = tagId[0:4]
 
         # print distances to debug
-        print(data[-4:])
+        if tagId != init_tag:
+            print(data[-4:])
+            put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
 
-        put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
 
 except KeyboardInterrupt:
     print('...Closing...')

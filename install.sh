@@ -17,14 +17,14 @@ pip3 install pyserial
 cp .bashrc ../
 
 # copy the init script to /etc/init.d and add to default start-up scripts
-#echo "copy init file"
-#cp atlas-init.sh /etc/init.d/
-#echo "chmod file"
-#sudo chmod 755 /etc/init.d/atlas-init.sh
+echo "copy init file"
+cp ~/atlas-pi/atlas-init.sh /etc/init.d/
+echo "chmod file"
+sudo chmod 755 /etc/init.d/atlas-init.sh
 #echo "chown flie"
 #sudo chown root:root /etc/init.d/atlas-init.sh
-#echo "add to defaults"
-#sudo update-rc.d atlas-init.sh defaults
+echo "add to defaults"
+sudo update-rc.d atlas-init.sh defaults
 
 # configure the aws creds
 echo "run: aws configure"
