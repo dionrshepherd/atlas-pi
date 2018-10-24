@@ -65,6 +65,9 @@ class Circle(object):
                 I1, I2 = I2, I1
             return (I1, I2, CASE)
 
+    def __str__(self):
+        return "x is %s, y is %s, radius is %s" % (self.xpos, self.ypos, self.radius)
+
 
 # Calculate distance between two points given Cartesian coordinates
 def calc_dist(p0, p1):
@@ -132,23 +135,21 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
         p1 = anchor0 + x*e_x + y*e_y + z_neg*e_z
         return([p0, p1])
     else:
-        print('r0')
-        print(r0)
-        print('r1')
-        print(r1)
-        print('r2')
-        print(r2)
-        print('anchor1_mod')
-        print(anchor1_mod)
-        print('anchor2_mod')
-        print(anchor2_mod)
         c0 = Circle(0, 0, r0)
         c1 = Circle(anchor1_mod[0], 0, r1)
         c2 = Circle(anchor2_mod[0], anchor2_mod[1], r2)
+        print('c0')
+        print(c0)
+        print('c1')
+        print(c1)
+        print('c2')
+        print(c2)
         p0_1 = np.array(c0.circle_intersect(c1)[0:2])
         p0_2 = np.array(c0.circle_intersect(c2)[0:2])
         p1_2 = np.array(c1.circle_intersect(c2)[0:2])
+        print('closest01_02')
         closest01_02 = find_two_closest(p0_1, p0_2)
+        print('closest01_12')
         closest01_12 = find_two_closest(p0_1, p1_2)
         p0 = p0_1[closest01_02[0]]
         p1 = p0_2[closest01_02[1]]
@@ -171,6 +172,7 @@ def triangulate(anchors, tag_id, positions):
 
     ## Find all possible singal points based on trilateration
     trianchors = itertools.combinations([(a0, r0), (a1, r1), (a2, r2), (a3, r3)], 3)
+    # TODO: is something fucky going on with deep vs shallow copy of these arrays
     candidates = []
     selections = []
     for B in trianchors:
