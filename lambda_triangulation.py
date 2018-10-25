@@ -138,18 +138,10 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
         c0 = Circle(0, 0, r0)
         c1 = Circle(anchor1_mod[0], 0, r1)
         c2 = Circle(anchor2_mod[0], anchor2_mod[1], r2)
-        print('c0')
-        print(c0)
-        print('c1')
-        print(c1)
-        print('c2')
-        print(c2)
         p0_1 = np.array(c0.circle_intersect(c1)[0:2])
         p0_2 = np.array(c0.circle_intersect(c2)[0:2])
         p1_2 = np.array(c1.circle_intersect(c2)[0:2])
-        print('closest01_02')
         closest01_02 = find_two_closest(p0_1, p0_2)
-        print('closest01_12')
         closest01_12 = find_two_closest(p0_1, p1_2)
         p0 = p0_1[closest01_02[0]]
         p1 = p0_2[closest01_02[1]]
