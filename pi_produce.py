@@ -11,25 +11,25 @@ if len(anchorId) > 4:
     sys.exit(1)
 print('...Anchor ID: ' + anchorId + '...')
 
-dynamodb = boto3.resource('dynamodb')
-table = dynamodb.Table('atlas_dev')
-init_tag = 'CC18'
-
-
-def put_to_db(time_stamp, tag_id, distance, anchor_id):
-    payload = {
-        'ts': str(time_stamp),
-        'dist': distance,
-    }
-
-    table.put_item(
-        Item={
-            'anchor': anchor_id,
-            'tag': tag_id,
-            'data': payload
-        }
-    )
-    return
+# dynamodb = boto3.resource('dynamodb')
+# table = dynamodb.Table('atlas_dev')
+# init_tag = 'CC18'
+#
+#
+# def put_to_db(time_stamp, tag_id, distance, anchor_id):
+#     payload = {
+#         'ts': str(time_stamp),
+#         'dist': distance,
+#     }
+#
+#     table.put_item(
+#         Item={
+#             'anchor': anchor_id,
+#             'tag': tag_id,
+#             'data': payload
+#         }
+#     )
+#     return
 
 
 print('...Opening serial port...')
