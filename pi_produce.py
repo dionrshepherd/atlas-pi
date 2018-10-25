@@ -59,10 +59,6 @@ time.sleep(0.5)
 ser.readline()
 time.sleep(2)
 ser.flushInput()
-ser.readline()
-ser.readline()
-ser.readline()
-ser.readline()
 
 # keep reading positions
 print('...Reading positions...')
