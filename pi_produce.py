@@ -81,6 +81,7 @@ try:
         # if tagId != init_tag:
         #     print(data[-4:])
         #     put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
+        # ['CC18=7.91', '5932=8.58', 'C52A=9.66', 'le_us=305', 'est']
         #-------------------------------------------------------------------------
         # get position data and strip newlines
         data = ser.readline().rstrip().decode()
@@ -96,7 +97,7 @@ try:
             data = pos.split('=')
             if len(data) < 2:
                 continue
-            if data[0] == init_tag:
+            if data[0] == init_tag or len(data[0]) > 4:
                 continue
 
             put_to_db(timeStamp, data[0], data[1], anchorId)
