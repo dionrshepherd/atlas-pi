@@ -64,44 +64,44 @@ ser.flushInput()
 print('...Reading positions...')
 try:
     while True:
-        timeStamp = time.time()
-        data = ser.read()
-        while data != b' ':
-            data = ser.read()
-
-        tagId = ser.read(6)
-
-        if int(tagId[0]) == 13:
-            data = ser.read(21)
-            tagId = tagId[2:6]
-        else:
-            data = ser.read(19)
-            tagId = tagId[0:4]
-
-        # print distances to debug
-        if tagId != init_tag:
-            print(data[-4:])
-            put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
+        # timeStamp = time.time()
+        # data = ser.read()
+        # while data != b' ':
+        #     data = ser.read()
+        #
+        # tagId = ser.read(6)
+        #
+        # if int(tagId[0]) == 13:
+        #     data = ser.read(21)
+        #     tagId = tagId[2:6]
+        # else:
+        #     data = ser.read(19)
+        #     tagId = tagId[0:4]
+        #
+        # # print distances to debug
+        # if tagId != init_tag:
+        #     print(data[-4:])
+        #     put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
         # ['CC18=7.91', '5932=8.58', 'C52A=9.66', 'le_us=305', 'est']
         #-------------------------------------------------------------------------
         # get position data and strip newlines
-        # data = ser.readline().rstrip().decode()
-        # print(data)
-        #
-        # # remove uneeded data that is between [] and split based on a space
-        # positions = re.sub("[\(\[].*?[\)\]]", '', data).split()
-        #
-        # # set timestamp arrays
-        # timeStamp = time.time()
-        #
-        # # split array of tags
-        # for pos in positions:
-        #     data = pos.split('=')
-        #     if len(data) == 1:
-        #         if data[0] != init_tag and len(data[0]) == 4:
-        #             put_to_db(timeStamp, data[0], data[1], anchorId)
-        #             print(data[0])
-        #             print(data[1])
+        data = ser.readline().rstrip().decode()
+        print(data)
+
+        # remove uneeded data that is between [] and split based on a space
+        positions = re.sub("[\(\[].*?[\)\]]", '', data).split()
+
+        # set timestamp arrays
+        timeStamp = time.time()
+
+        # split array of tags
+        for pos in positions:
+            data = pos.split('=')
+            if len(data) == 1:
+                if data[0] != init_tag and len(data[0]) == 4:
+                    put_to_db(timeStamp, data[0], data[1], anchorId)
+                    print(data[0])
+                    print(data[1])
 
 
 except KeyboardInterrupt:
