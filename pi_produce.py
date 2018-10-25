@@ -13,7 +13,7 @@ print('...Anchor ID: ' + anchorId + '...')
 
 # dynamodb = boto3.resource('dynamodb')
 # table = dynamodb.Table('atlas_dev')
-# init_tag = 'CC18'
+init_tag = 'CC18'
 #
 #
 # def put_to_db(time_stamp, tag_id, distance, anchor_id):
@@ -83,26 +83,24 @@ try:
         #     put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
         #-------------------------------------------------------------------------
         # get position data and strip newlines
-        print('wut')
-        data = ser.readline()
         data = ser.readline().rstrip().decode()
-        print(data)
+
         # remove uneeded data that is between [] and split based on a space
         positions = re.sub("[\(\[].*?[\)\]]", '', data).split()
         print(positions)
+
         # set timestamp arrays
         timeStamp = time.time()
-        tags = []
-        dist = []
-        # create the arrays needed to push to stream
-        # for pos in positions:
-        #     data = pos.split('=')
-        #     if len(data) < 2:
-        #         print('Incorrect format')
-        #         ser.close()
-        #         sys.exit(0)
-        #     tags.append(data[0])
-        # dist.append(data[1])
+
+        # split array of tags
+        for pos in positions:
+            data = pos.split('=')
+            if len(data) < 2:
+                continue
+            if data[0] == init_tag:
+                continue
+            print(data[0])
+            print(data[1])
 
 
 except KeyboardInterrupt:
