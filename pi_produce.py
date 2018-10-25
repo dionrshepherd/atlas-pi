@@ -102,7 +102,7 @@ try:
         # split array of tags
         for pos in positions:
             data = pos.split('=')
-            if len(data) > 2:
+            if len(data) == 1:
                 if data[0] != init_tag and len(data[0]) == 4:
                     put_to_db(timeStamp, data[0], data[1], anchorId)
                     print(data[0])
