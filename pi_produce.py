@@ -60,15 +60,15 @@ time.sleep(0.5)
 ser.readline()
 time.sleep(2)
 ser.flushInput()
+ser.readline()
+ser.readline()
+ser.readline()
+ser.readline()
 
 # keep reading positions
 print('...Reading positions...')
 try:
     while True:
-        ser.readline()
-        ser.readline()
-        ser.readline()
-        ser.readline()
         # timeStamp = time.time()
         # data = ser.read()
         # while data != b' ':
@@ -90,8 +90,8 @@ try:
         # ['CC18=7.91', '5932=8.58', 'C52A=9.66', 'le_us=305', 'est']
         #-------------------------------------------------------------------------
         # get position data and strip newlines
-        print('here')
         data = ser.readline().rstrip().decode()
+        print(data)
 
         # remove uneeded data that is between [] and split based on a space
         positions = re.sub("[\(\[].*?[\)\]]", '', data).split()
