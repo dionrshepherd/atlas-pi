@@ -3,6 +3,7 @@ import serial
 import os
 import sys
 import boto3
+import re
 
 anchorId = os.environ['ANCHOR_ID']
 if len(anchorId) > 4:
@@ -62,24 +63,43 @@ ser.flushInput()
 print('...Reading positions...')
 try:
     while True:
+        # timeStamp = time.time()
+        # data = ser.read()
+        # while data != b' ':
+        #     data = ser.read()
+        #
+        # tagId = ser.read(6)
+        #
+        # if int(tagId[0]) == 13:
+        #     data = ser.read(21)
+        #     tagId = tagId[2:6]
+        # else:
+        #     data = ser.read(19)
+        #     tagId = tagId[0:4]
+        #
+        # # print distances to debug
+        # if tagId != init_tag:
+        #     print(data[-4:])
+        #     put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
+        #-------------------------------------------------------------------------
+        # get position data and strip newlines
+        data = ser.readline().rstrip().decode()
+        # remove uneeded data that is between [] and split based on a space
+        positions = re.sub("[\(\[].*?[\)\]]", '', data).split()
+        print(positions)
+        # set timestamp arrays
         timeStamp = time.time()
-        data = ser.read()
-        while data != b' ':
-            data = ser.read()
-
-        tagId = ser.read(6)
-
-        if int(tagId[0]) == 13:
-            data = ser.read(21)
-            tagId = tagId[2:6]
-        else:
-            data = ser.read(19)
-            tagId = tagId[0:4]
-
-        # print distances to debug
-        if tagId != init_tag:
-            print(data[-4:])
-            put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
+        tags = []
+        dist = []
+        # create the arrays needed to push to stream
+        # for pos in positions:
+        #     data = pos.split('=')
+        #     if len(data) < 2:
+        #         print('Incorrect format')
+        #         ser.close()
+        #         sys.exit(0)
+        #     tags.append(data[0])
+        # dist.append(data[1])
 
 
 except KeyboardInterrupt:
