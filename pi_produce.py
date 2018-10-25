@@ -87,7 +87,6 @@ try:
 
         # remove uneeded data that is between [] and split based on a space
         positions = re.sub("[\(\[].*?[\)\]]", '', data).split()
-        print(positions)
 
         # set timestamp arrays
         timeStamp = time.time()
