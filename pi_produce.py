@@ -40,7 +40,6 @@ ser = serial.Serial(
     parity=serial.PARITY_ODD,
     stopbits=serial.STOPBITS_ONE_POINT_FIVE,
     bytesize=serial.SEVENBITS,
-    timeout=0.1
 )
 
 print('...Sending les command...')
