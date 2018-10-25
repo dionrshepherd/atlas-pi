@@ -13,6 +13,7 @@ case "$1" in
   stop)
     echo "Stop all running python scripts"
     pkill -9 -f pi_produce.py
+    # fuser -k /dev/ttyUSB9
     ;;
   *)
     echo "Usage: /etc/init.d/atlas-init.sh {start|stop}"

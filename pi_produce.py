@@ -22,13 +22,14 @@ def put_to_db(time_stamp, tag_id, distance, anchor_id):
         'dist': distance,
     }
 
-    table.put_item(
+    response = table.put_item(
         Item={
             'anchor': anchor_id,
             'tag': tag_id,
             'data': payload
         }
     )
+    print(response)
     return
 
 
@@ -39,6 +40,7 @@ ser = serial.Serial(
     parity=serial.PARITY_ODD,
     stopbits=serial.STOPBITS_ONE_POINT_FIVE,
     bytesize=serial.SEVENBITS,
+    timeout=0.1
 )
 
 print('...Sending les command...')
@@ -83,10 +85,6 @@ try:
         #     put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
         # ['CC18=7.91', '5932=8.58', 'C52A=9.66', 'le_us=305', 'est']
         #-------------------------------------------------------------------------
-        ser.readline()
-        ser.readline()
-        ser.readline()
-        ser.readline()
         # get position data and strip newlines
         data = ser.readline().rstrip().decode()
 
@@ -99,14 +97,11 @@ try:
         # split array of tags
         for pos in positions:
             data = pos.split('=')
-            if len(data) < 2:
-                continue
-            if data[0] == init_tag or len(data[0]) != 4:
-                continue
-
-            put_to_db(timeStamp, data[0], data[1], anchorId)
-            print(data[0])
-            print(data[1])
+            if len(data) > 2:
+                if data[0] != init_tag and len(data[0]) == 4:
+                    put_to_db(timeStamp, data[0], data[1], anchorId)
+                    print(data[0])
+                    print(data[1])
 
 
 except KeyboardInterrupt:
