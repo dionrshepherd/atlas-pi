@@ -84,6 +84,7 @@ try:
         #-------------------------------------------------------------------------
         # get position data and strip newlines
         print('wut')
+        data = ser.readline()
         data = ser.readline().rstrip().decode()
         print(data)
         # remove uneeded data that is between [] and split based on a space
