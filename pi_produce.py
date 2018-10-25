@@ -83,7 +83,9 @@ try:
         #     put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
         #-------------------------------------------------------------------------
         # get position data and strip newlines
+        print('wut')
         data = ser.readline().rstrip().decode()
+        print(data)
         # remove uneeded data that is between [] and split based on a space
         positions = re.sub("[\(\[].*?[\)\]]", '', data).split()
         print(positions)
