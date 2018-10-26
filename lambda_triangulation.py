@@ -282,6 +282,9 @@ def lambda_handler(event, context):
         # 200 milliseconds
         if time_diff < 0.2:
             triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+        else:
+            print('skipped:')
+            print(tag_id)
 
         # if a_len == 4:
         #     print(json.dumps({
