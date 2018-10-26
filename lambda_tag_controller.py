@@ -38,7 +38,7 @@ def lambda_handler(event, context):
                 anchors.append({
                     "id": i['anchor'],
                     "dist": item_dist,
-                    "ts": i['data']['ts']
+                    "ts": float(i['data']['ts'])
                 })
             tag = {
                 "id": tag_id,

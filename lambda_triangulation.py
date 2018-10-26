@@ -5,6 +5,8 @@ import itertools
 import math
 import boto3
 import time
+import uuid
+from copy import deepcopy
 
 
 sns_client = boto3.client('sns', region_name='ap-southeast-2')
@@ -86,25 +88,20 @@ def sphere_intersect(anchorA, rA, anchorB, rB, r0, r1):
 
 
 def find_two_closest(pointsA, pointsB):
-    try:
-        dist0 = calc_dist(pointsA[0], pointsB[0])
-        dist1 = calc_dist(pointsA[1], pointsB[0])
-        dist2 = calc_dist(pointsA[0], pointsB[1])
-        dist3 = calc_dist(pointsA[1], pointsB[1])
-        min_dist = min(dist0, dist1, dist2, dist3)
-        if min_dist == dist0:
-            return([0, 0])
-        elif min_dist == dist1:
-            return([1, 0])
-        elif min_dist == dist2:
-            return([0, 1])
-        else:
-            return([1, 1])
-    except IndexError:
-        print('pointsA')
-        print(pointsA)
-        print('pointsB')
-        print(pointsB)
+    dist0 = calc_dist(pointsA[0], pointsB[0])
+    dist1 = calc_dist(pointsA[1], pointsB[0])
+    dist2 = calc_dist(pointsA[0], pointsB[1])
+    dist3 = calc_dist(pointsA[1], pointsB[1])
+    min_dist = min(dist0, dist1, dist2, dist3)
+    if min_dist == dist0:
+        return([0, 0])
+    elif min_dist == dist1:
+        return([1, 0])
+    elif min_dist == dist2:
+        return([0, 1])
+    else:
+        return([1, 1])
+
 
 
 # Given three intersecting spheres, find the two points of intersection
@@ -151,7 +148,7 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
         return(ave_point)
 
 
-def triangulate(anchors, tag_id, positions):
+def triangulate(anchors, tag_id, positions, uid):
     # Find all possible singal points based on trilateration
     a0 = np.array(positions[anchors[0]['id']])
     r0 = anchors[0]['dist']
@@ -164,7 +161,6 @@ def triangulate(anchors, tag_id, positions):
 
     ## Find all possible singal points based on trilateration
     trianchors = itertools.combinations([(a0, r0), (a1, r1), (a2, r2), (a3, r3)], 3)
-    # TODO: is something fucky going on with deep vs shallow copy of these arrays
     candidates = []
     selections = []
     for B in trianchors:
@@ -220,11 +216,7 @@ def triangulate(anchors, tag_id, positions):
         else:
             selections.append(np.mean(candidates[i], 0))
 
-    print('selections')
-    print(selections)
     pos_mean = np.mean(selections, axis=0)
-    print('pos_mean')
-    print(pos_mean)
 
     data = {
         "tag": tag_id,
@@ -232,6 +224,12 @@ def triangulate(anchors, tag_id, positions):
         "y": pos_mean[1] - 1,
         "z": time.time()
     }
+
+    # debugging
+    print(json.dumps({
+        "id": uid,
+        "coords": data
+    }))
 
     iot_data_client.publish(
         topic='atlasDevTagCoords',
@@ -265,14 +263,36 @@ def lambda_handler(event, context):
         anchor_positions[i['anchorId']] = coords
 
     tag_id = data['id']
+    # set unique id for debugging
+    uid = uuid.uuid5(uuid.NAMESPACE_DNS, tag_id)
     anchors = data['anchors']
     a_len = len(anchors)
     if a_len < 4:
         print('not enough anchor points for accurate triangulation')
         return
     else:
-        if a_len == 4:
-            triangulate(anchors, tag_id, anchor_positions)
-        else:
-            anchors.sort(key=lambda x: x['ts'], reverse=True)
-            triangulate(anchors[0:4], tag_id, anchor_positions)
+        anchors.sort(key=lambda x: x['ts'], reverse=True)
+        sorted_anchors = anchors[0:4]
+        print(json.dumps({
+            "id": uid,
+            "anchors": sorted_anchors
+        }))
+
+        time_diff = sorted_anchors[0]['ts'] - sorted_anchors[3]['ts']
+        # 200 milliseconds
+        if time_diff < 0.2:
+            triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+
+        # if a_len == 4:
+        #     print(json.dumps({
+        #         "id": uid,
+        #         "anchors": anchors
+        #     }))
+        #
+        # else:
+        #     anchors.sort(key=lambda x: x['ts'], reverse=True)
+        #     print(json.dumps({
+        #         "id": uid,
+        #         "anchors": anchors
+        #     }))
+        #     triangulate(anchors[0:4], tag_id, anchor_positions, uid)
