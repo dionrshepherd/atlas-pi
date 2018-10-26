@@ -227,7 +227,7 @@ def triangulate(anchors, tag_id, positions, uid):
 
     # debugging
     print(json.dumps({
-        "id": uid,
+        "id": str(uid),
         "coords": data
     }))
 
@@ -274,7 +274,7 @@ def lambda_handler(event, context):
         anchors.sort(key=lambda x: x['ts'], reverse=True)
         sorted_anchors = anchors[0:4]
         print(json.dumps({
-            "id": uid,
+            "id": str(uid),
             "anchors": sorted_anchors
         }))
 
