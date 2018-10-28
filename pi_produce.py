@@ -5,6 +5,30 @@ import sys
 import boto3
 import re
 
+
+def put_to_db(time_stamp, tag_id, distance, anchor_id):
+    payload = {
+        'ts': str(time_stamp),
+        'dist': distance,
+    }
+
+    table.put_item(
+        Item={
+            'anchor': anchor_id,
+            'tag': tag_id,
+            'data': payload
+        }
+    )
+    return
+
+
+def get_tag_index(id, tags):
+    for i, t in enumerate(tags):
+        if t['id'] == id:
+            return i, t
+    return -1, {}
+
+
 anchorId = os.environ['ANCHOR_ID']
 if len(anchorId) > 4:
     print('Anchor ID has not been set in .bashrc')
@@ -14,24 +38,7 @@ print('...Anchor ID: ' + anchorId + '...')
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('atlas_dev')
 init_tag = 'CC18'
-
-
-def put_to_db(time_stamp, tag_id, distance, anchor_id):
-    payload = {
-        'ts': str(time_stamp),
-        'dist': distance,
-    }
-
-    response = table.put_item(
-        Item={
-            'anchor': anchor_id,
-            'tag': tag_id,
-            'data': payload
-        }
-    )
-    print(response)
-    return
-
+seen_tags = []
 
 print('...Opening serial port...')
 ser = serial.Serial(
@@ -64,44 +71,37 @@ ser.flushInput()
 print('...Reading positions...')
 try:
     while True:
-        # timeStamp = time.time()
-        # data = ser.read()
-        # while data != b' ':
-        #     data = ser.read()
-        #
-        # tagId = ser.read(6)
-        #
-        # if int(tagId[0]) == 13:
-        #     data = ser.read(21)
-        #     tagId = tagId[2:6]
-        # else:
-        #     data = ser.read(19)
-        #     tagId = tagId[0:4]
-        #
-        # # print distances to debug
-        # if tagId != init_tag:
-        #     print(data[-4:])
-        #     put_to_db(timeStamp, tagId.decode(), data[-4:].decode(), anchorId)
-        # ['CC18=7.91', '5932=8.58', 'C52A=9.66', 'le_us=305', 'est']
-        #-------------------------------------------------------------------------
         # get position data and strip newlines
-        data = ser.readline().rstrip().decode()
-        print(data)
+        current_data = ser.readline().rstrip().decode()
 
         # remove uneeded data that is between [] and split based on a space
-        positions = re.sub("[\(\[].*?[\)\]]", '', data).split()
+        positions = re.sub("[\(\[].*?[\)\]]", '', current_data).split()
 
         # set timestamp arrays
         timeStamp = time.time()
 
         # split array of tags
         for pos in positions:
-            data = pos.split('=')
-            if len(data) == 2:
-                if data[0] != init_tag and len(data[0]) == 4:
-                    put_to_db(timeStamp, data[0], data[1], anchorId)
-                    print(data[0])
-                    print(data[1])
+            current_data = pos.split('=')
+            if len(current_data) == 2:
+                if current_data[0] != init_tag and len(current_data[0]) == 4:
+                    seen_tag = {
+                        "id": current_data[0],
+                        "dist": current_data[1],
+                        "ts": timeStamp
+                    }
+                    previous_data = get_tag_index(current_data[0], seen_tags)
+                    if previous_data[0] > -1:
+                        dist_diff = abs(float(current_data[1]) - float(previous_data[1]["dist"]))
+                        time_diff = abs(float(timeStamp) - float(previous_data[1]["ts"]))
+                        if dist_diff > 2 and time_diff < 1:
+                            put_to_db(previous_data[1]["ts"], previous_data[1]["id"], previous_data[1]["dist"], anchorId)
+                        else:
+                            seen_tags[previous_data[0]] = seen_tag
+                            put_to_db(timeStamp, current_data[0], current_data[1], anchorId)
+                    else:
+                        seen_tags.append(seen_tag)
+                        put_to_db(timeStamp, current_data[0], current_data[1], anchorId)
 
 
 except KeyboardInterrupt:
