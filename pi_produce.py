@@ -7,6 +7,7 @@ import re
 
 
 def put_to_db(time_stamp, tag_id, distance, anchor_id):
+    print('tag: {}, distance: {}, ts: {}').format(tag_id, distance, time_stamp)
     payload = {
         'ts': str(time_stamp),
         'dist': distance,
