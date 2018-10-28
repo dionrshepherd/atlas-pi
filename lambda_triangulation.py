@@ -6,7 +6,6 @@ import math
 import boto3
 import time
 import uuid
-from copy import deepcopy
 
 
 sns_client = boto3.client('sns', region_name='ap-southeast-2')
@@ -24,7 +23,7 @@ class Circle(object):
         self.ypos = yposition
         self.radius = radius
 
-    def circle_intersect(self, circle2):
+    def circle_intersect(self, circle2, uid):
         """
         Intersection points of two circles using the construction of triangles
         as proposed by Paul Bourke, 1997.
@@ -40,10 +39,13 @@ class Circle(object):
         D = round(math.sqrt(Dx**2 + Dy**2), PRECISION)
         # Distance between circle centres
         if D > R1 + R2:
+            print('INFO: The circles do not intersect; id: {}'.format(uid))
             return "The circles do not intersect"
         elif D < math.fabs(R2 - R1):
+            print('INFO: No Intersect - One circle is contained within the other; id: {}'.format(uid))
             return "No Intersect - One circle is contained within the other"
         elif D == 0 and R1 == R2:
+            print('INFO: No Intersect - The circles are equal and coincident; id: {}'.format(uid))
             return "No Intersect - The circles are equal and coincident"
         else:
             if D == R1 + R2 or D == R1 - R2:
@@ -105,7 +107,7 @@ def find_two_closest(pointsA, pointsB):
 
 
 # Given three intersecting spheres, find the two points of intersection
-def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
+def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, uid):
     if not (sphere_intersect(anchor0, r0, anchor1, r1, r0, r1) and sphere_intersect(anchor0, r0, anchor2, r2, r0, r1) and sphere_intersect(anchor1, r1, anchor2, r2, r0, r1)):
         return([])
 
@@ -135,9 +137,9 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2):
         c0 = Circle(0, 0, r0)
         c1 = Circle(anchor1_mod[0], 0, r1)
         c2 = Circle(anchor2_mod[0], anchor2_mod[1], r2)
-        p0_1 = np.array(c0.circle_intersect(c1)[0:2])
-        p0_2 = np.array(c0.circle_intersect(c2)[0:2])
-        p1_2 = np.array(c1.circle_intersect(c2)[0:2])
+        p0_1 = np.array(c0.circle_intersect(c1, uid)[0:2])
+        p0_2 = np.array(c0.circle_intersect(c2, uid)[0:2])
+        p1_2 = np.array(c1.circle_intersect(c2, uid)[0:2])
         closest01_02 = find_two_closest(p0_1, p0_2)
         closest01_12 = find_two_closest(p0_1, p1_2)
         p0 = p0_1[closest01_02[0]]
@@ -164,7 +166,7 @@ def triangulate(anchors, tag_id, positions, uid):
     candidates = []
     selections = []
     for B in trianchors:
-        trilat = trilateration(B[0][0], B[0][1], B[1][0], B[1][1], B[2][0], B[2][1])
+        trilat = trilateration(B[0][0], B[0][1], B[1][0], B[1][1], B[2][0], B[2][1], uid)
         if len(trilat) == 0:
             continue
         if type(trilat) == list:
@@ -228,7 +230,7 @@ def triangulate(anchors, tag_id, positions, uid):
     # debugging
     print(json.dumps({
         "id": str(uid),
-        "coords": data
+        "coords": data,
     }))
 
     iot_data_client.publish(
@@ -264,7 +266,7 @@ def lambda_handler(event, context):
 
     tag_id = data['id']
     # set unique id for debugging
-    uid = uuid.uuid5(uuid.NAMESPACE_DNS, tag_id)
+    uid = str(uuid.uuid4())
     anchors = data['anchors']
     a_len = len(anchors)
     if a_len < 4:
@@ -273,29 +275,15 @@ def lambda_handler(event, context):
     else:
         anchors.sort(key=lambda x: x['ts'], reverse=True)
         sorted_anchors = anchors[0:4]
-        print(json.dumps({
-            "id": str(uid),
-            "anchors": sorted_anchors
-        }))
-
         time_diff = sorted_anchors[0]['ts'] - sorted_anchors[3]['ts']
+
         # 200 milliseconds
         if time_diff < 0.2:
+            # debugging
+            print(json.dumps({
+                "id": str(uid),
+                "anchors": sorted_anchors
+            }))
             triangulate(sorted_anchors, tag_id, anchor_positions, uid)
         else:
-            print('skipped:')
-            print(tag_id)
-
-        # if a_len == 4:
-        #     print(json.dumps({
-        #         "id": uid,
-        #         "anchors": anchors
-        #     }))
-        #
-        # else:
-        #     anchors.sort(key=lambda x: x['ts'], reverse=True)
-        #     print(json.dumps({
-        #         "id": uid,
-        #         "anchors": anchors
-        #     }))
-        #     triangulate(anchors[0:4], tag_id, anchor_positions, uid)
+            print('skipped: {}'.format(tag_id))
