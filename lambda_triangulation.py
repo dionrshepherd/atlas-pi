@@ -222,8 +222,8 @@ def triangulate(anchors, tag_id, positions, uid):
 
     data = {
         "tag": tag_id,
-        "x": pos_mean[0] - 1,
-        "y": pos_mean[1] - 1,
+        "x": pos_mean[0] - 90,
+        "y": pos_mean[1] - 90,
         "z": time.time()
     }
 
