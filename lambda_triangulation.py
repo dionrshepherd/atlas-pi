@@ -265,26 +265,29 @@ def lambda_handler(event, context):
         anchor_positions[i['anchorId']] = coords
 
     tag_id = data['id']
-    # set unique id for debugging
-    uid = str(uuid.uuid4())
     anchors = data['anchors']
     a_len = len(anchors)
+
     if a_len < 4:
         print('not enough anchor points for accurate triangulation')
         return
     else:
-        # anchors.sort(key=lambda x: x['ts'], reverse=True)
+        # set unique id for debugging
+        uid = str(uuid.uuid4())
+        # sort by furthurest distance
         anchors.sort(key=lambda x: x['dist'], reverse=True)
-        sorted_anchors = anchors[0:4]
-        time_diff = sorted_anchors[0]['ts'] - sorted_anchors[3]['ts']
 
-        # 200 milliseconds
-        if time_diff < 0.2:
-            # debugging
-            print(json.dumps({
-                "id": str(uid),
-                "anchors": sorted_anchors
-            }))
-            triangulate(sorted_anchors, tag_id, anchor_positions, uid)
-        else:
-            print('skipped: {}'.format(tag_id))
+        for i in range(0, a_len - 3):
+            sorted_anchors = anchors[i:i+4]
+            time_diff = sorted_anchors[0]['ts'] - sorted_anchors[3]['ts']
+            # 200 milliseconds
+            if time_diff < 0.2:
+                # debugging
+                print(json.dumps({
+                    "id": str(uid),
+                    "anchors": sorted_anchors
+                }))
+                triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+            else:
+                continue
+        print('skipped: {}'.format(tag_id))
