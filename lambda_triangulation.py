@@ -279,6 +279,7 @@ def lambda_handler(event, context):
 
         for i in range(0, a_len - 3):
             sorted_anchors = anchors[i:i+4]
+            sorted_anchors.sort(key=lambda x: x['ts'], reverse=True)
             time_diff = sorted_anchors[0]['ts'] - sorted_anchors[3]['ts']
             # 200 milliseconds
             if time_diff < 0.2:
@@ -288,6 +289,9 @@ def lambda_handler(event, context):
                     "anchors": sorted_anchors
                 }))
                 triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+                return
             else:
+                print('bad set with time diff of {}'.format(time_diff))
                 continue
-        print('skipped: {}'.format(tag_id))
+        else:
+            print('skipped: {}'.format(tag_id))
