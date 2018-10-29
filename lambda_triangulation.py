@@ -222,8 +222,8 @@ def triangulate(anchors, tag_id, positions, uid):
 
     data = {
         "tag": tag_id,
-        "x": pos_mean[0] - 90,
-        "y": pos_mean[1] - 90,
+        "x": pos_mean[0] - 1,
+        "y": pos_mean[1] - 1,
         "z": time.time()
     }
 
@@ -282,7 +282,7 @@ def lambda_handler(event, context):
             sorted_anchors.sort(key=lambda x: x['ts'], reverse=True)
             time_diff = sorted_anchors[0]['ts'] - sorted_anchors[3]['ts']
             # 200 milliseconds
-            if time_diff < 0.2:
+            if time_diff < 0.2: # 0.3 or 0.4 maybe
                 # debugging
                 print(json.dumps({
                     "id": str(uid),
