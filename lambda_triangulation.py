@@ -273,7 +273,8 @@ def lambda_handler(event, context):
         print('not enough anchor points for accurate triangulation')
         return
     else:
-        anchors.sort(key=lambda x: x['ts'], reverse=True)
+        # anchors.sort(key=lambda x: x['ts'], reverse=True)
+        anchors.sort(key=lambda x: x['dist'], reverse=True)
         sorted_anchors = anchors[0:4]
         time_diff = sorted_anchors[0]['ts'] - sorted_anchors[3]['ts']
 
