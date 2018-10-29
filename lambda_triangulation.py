@@ -244,9 +244,9 @@ def triangulate(anchors, tag_id, positions, uid):
     )
     return 0
 
-def time_check(s_a, u, len):
+def time_check(s_a, u, l):
     s_a.sort(key=lambda x: x['ts'], reverse=True)
-    time_diff = s_a[0]['ts'] - s_a[len]['ts']
+    time_diff = s_a[0]['ts'] - s_a[l]['ts']
 
     if time_diff < 0.3:
         print(json.dumps({
