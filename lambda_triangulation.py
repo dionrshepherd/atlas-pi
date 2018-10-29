@@ -152,17 +152,12 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, uid):
 
 def triangulate(anchors, tag_id, positions, uid):
     # Find all possible singal points based on trilateration
-    a0 = np.array(positions[anchors[0]['id']])
-    r0 = anchors[0]['dist']
-    a1 = np.array(positions[anchors[1]['id']])
-    r1 = anchors[1]['dist']
-    a2 = np.array(positions[anchors[2]['id']])
-    r2 = anchors[2]['dist']
-    a3 = np.array(positions[anchors[3]['id']])
-    r3 = anchors[3]['dist']
+    combinations = []
+    for i in range(0, len(anchors)):
+        combinations.append([np.array(positions[anchors[i]['id']]), anchors[i]['dist']])
 
     ## Find all possible singal points based on trilateration
-    trianchors = itertools.combinations([(a0, r0), (a1, r1), (a2, r2), (a3, r3)], 3)
+    trianchors = itertools.combinations(combinations, 3)
     candidates = []
     selections = []
     for B in trianchors:
@@ -249,6 +244,21 @@ def triangulate(anchors, tag_id, positions, uid):
     )
     return 0
 
+def time_check(s_a, u, len):
+    s_a.sort(key=lambda x: x['ts'], reverse=True)
+    time_diff = s_a[0]['ts'] - s_a[len]['ts']
+
+    if time_diff < 0.3:
+        print(json.dumps({
+            "id": u,
+            "anchors": s_a,
+            "length": len(s_a)
+        }))
+        return True
+    else:
+        print('id: {}, bad set with time diff of {}'.format(u, time_diff))
+        return False
+
 
 def lambda_handler(event, context):
     # get tags and anchors
@@ -272,26 +282,64 @@ def lambda_handler(event, context):
         print('not enough anchor points for accurate triangulation')
         return
     else:
-        # set unique id for debugging
         uid = str(uuid.uuid4())
-        # sort by furthurest distance
         anchors.sort(key=lambda x: x['dist'], reverse=True)
 
-        for i in range(0, a_len - 3):
-            sorted_anchors = anchors[i:i+4]
-            sorted_anchors.sort(key=lambda x: x['ts'], reverse=True)
-            time_diff = sorted_anchors[0]['ts'] - sorted_anchors[3]['ts']
-            # 200 milliseconds
-            if time_diff < 0.2: # 0.3 or 0.4 maybe
-                # debugging
-                print(json.dumps({
-                    "id": str(uid),
-                    "anchors": sorted_anchors
-                }))
-                triangulate(sorted_anchors, tag_id, anchor_positions, uid)
-                return
+        if a_len == 4:
+            if time_check(anchors, uid, 3):
+                triangulate(anchors, tag_id, anchor_positions, uid)
             else:
-                print('bad set with time diff of {}'.format(time_diff))
-                continue
+                print('skipped: {}'.format(tag_id))
+                return
+        elif a_len == 5:
+            if time_check(anchors, uid, 4):
+                triangulate(anchors, tag_id, anchor_positions, uid)
+            else:
+                for i in range(0, a_len - 3):
+                    sorted_anchors = anchors[i:i+4]
+                    if time_check(sorted_anchors, uid, 3):
+                        triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+                        return
+                else:
+                    print('skipped: {}'.format(tag_id))
+                    return
+        elif a_len == 6:
+            if time_check(anchors, uid, 5):
+                triangulate(anchors, tag_id, anchor_positions, uid)
+            else:
+                for i in range(0, a_len - 4):
+                    sorted_anchors = anchors[i:i+5]
+                    if time_check(sorted_anchors, uid, 4):
+                        triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+                        return
+                else:
+                    for i in range(0, a_len - 3):
+                        sorted_anchors = anchors[i:i+4]
+                        if time_check(sorted_anchors, uid, 3):
+                            triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+                            return
+                    else:
+                        print('skipped: {}'.format(tag_id))
+                        return
+
         else:
-            print('skipped: {}'.format(tag_id))
+            for i in range(0, a_len - 5):
+                sorted_anchors = anchors[i:i+6]
+                if time_check(sorted_anchors, uid, 5):
+                    triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+                    return
+            else:
+                for i in range(0, a_len - 4):
+                    sorted_anchors = anchors[i:i+5]
+                    if time_check(sorted_anchors, uid, 4):
+                        triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+                        return
+                else:
+                    for i in range(0, a_len - 3):
+                        sorted_anchors = anchors[i:i+4]
+                        if time_check(sorted_anchors, uid, 3):
+                            triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+                            return
+                    else:
+                        print('skipped: {}'.format(tag_id))
+                        return
