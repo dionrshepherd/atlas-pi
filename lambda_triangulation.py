@@ -303,8 +303,9 @@ def lambda_handler(event, context):
             else:
                 # 5 failed; check all length 4 distance combinations
                 for i in range(2):
-                    if time_check(dist_sort[i:i+3], uid, 3):
-                        triangulate(dist_sort[i:i+3], tag_id, anchor_positions, uid)
+                    a_sorted = sorted(dist_sort[i:i+3], key=lambda x: x['ts'], reverse=True)
+                    if time_check(a_sorted, uid, 3):
+                        triangulate(a_sorted, tag_id, anchor_positions, uid)
                         return
                 else:
                     # distance combinations failed due to time so sort by time len 4
@@ -324,14 +325,16 @@ def lambda_handler(event, context):
             else:
                 # 6 failed; check all length 5 distance combinations
                 for i in range(2):
-                    if time_check(dist_sort[i:i+4], uid, 4):
-                        triangulate(dist_sort[i:i+4], tag_id, anchor_positions, uid)
+                    a_sorted = sorted(dist_sort[i:i+4], key=lambda x: x['ts'], reverse=True)
+                    if time_check(a_sorted, uid, 4):
+                        triangulate(a_sorted, tag_id, anchor_positions, uid)
                         return
                 else:
                     # 5 failed; check all length 4 distance combinations
                     for i in range(3):
-                        if time_check(dist_sort[i:i+3], uid, 3):
-                            triangulate(dist_sort[i:i+3], tag_id, anchor_positions, uid)
+                        a_sorted = sorted(dist_sort[i:i+3], key=lambda x: x['ts'], reverse=True)
+                        if time_check(a_sorted, uid, 3):
+                            triangulate(a_sorted, tag_id, anchor_positions, uid)
                             return
                     else:
                         # distance combinations failed due to time so sort by time len 5
