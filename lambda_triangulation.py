@@ -245,6 +245,8 @@ def triangulate(anchors, tag_id, positions, uid):
     return 0
 
 def time_check(s_a, u, l):
+    print(s_a)
+    print(l)
     time_diff = s_a[0]['ts'] - s_a[l]['ts']
     if time_diff < 0.3:
         print(json.dumps({
@@ -317,7 +319,7 @@ def lambda_handler(event, context):
 
         elif a_len == 6:
             # check the 6 positions fist
-            if time_check(time_sort, uid, 4):
+            if time_check(time_sort, uid, 5):
                 triangulate(time_sort, tag_id, anchor_positions, uid)
             else:
                 # 6 failed; check all length 5 distance combinations
