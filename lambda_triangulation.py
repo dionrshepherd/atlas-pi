@@ -12,7 +12,6 @@ sns_client = boto3.client('sns', region_name='ap-southeast-2')
 iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
 db_resource = boto3.resource('dynamodb')
 table = db_resource.Table('atlas_dev_anchor_location')
-logger = {}
 TIME_DIFFERENCE = 0.3
 
 
@@ -25,7 +24,7 @@ class Circle(object):
         self.ypos = yposition
         self.radius = radius
 
-    def circle_intersect(self, circle2, uid):
+    def circle_intersect(self, circle2, logger):
         """
         Intersection points of two circles using the construction of triangles
         as proposed by Paul Bourke, 1997.
@@ -109,7 +108,7 @@ def find_two_closest(pointsA, pointsB):
 
 
 # Given three intersecting spheres, find the two points of intersection
-def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, uid):
+def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, uid, logger):
     if not (sphere_intersect(anchor0, r0, anchor1, r1, r0, r1) and sphere_intersect(anchor0, r0, anchor2, r2, r0, r1) and sphere_intersect(anchor1, r1, anchor2, r2, r0, r1)):
         return([])
 
@@ -139,9 +138,9 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, uid):
         c0 = Circle(0, 0, r0)
         c1 = Circle(anchor1_mod[0], 0, r1)
         c2 = Circle(anchor2_mod[0], anchor2_mod[1], r2)
-        p0_1 = np.array(c0.circle_intersect(c1, uid)[0:2])
-        p0_2 = np.array(c0.circle_intersect(c2, uid)[0:2])
-        p1_2 = np.array(c1.circle_intersect(c2, uid)[0:2])
+        p0_1 = np.array(c0.circle_intersect(c1, logger)[0:2])
+        p0_2 = np.array(c0.circle_intersect(c2, logger)[0:2])
+        p1_2 = np.array(c1.circle_intersect(c2, logger)[0:2])
 
         if type(p0_1) is str or type(p0_2) is str or type(p1_2) is str:
             logger['level'] = 'ERROR'
@@ -157,7 +156,7 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, uid):
         return(ave_point)
 
 
-def triangulate(anchors, tag_id, positions, uid):
+def triangulate(anchors, tag_id, positions, uid, logger):
     # Find all possible singal points based on trilateration
     combinations = []
     for i in range(0, len(anchors)):
@@ -168,7 +167,7 @@ def triangulate(anchors, tag_id, positions, uid):
     candidates = []
     selections = []
     for B in trianchors:
-        trilat = trilateration(B[0][0], B[0][1], B[1][0], B[1][1], B[2][0], B[2][1], uid)
+        trilat = trilateration(B[0][0], B[0][1], B[1][0], B[1][1], B[2][0], B[2][1], uid, logger)
         if len(trilat) == 0:
             continue
         if type(trilat) == list:
@@ -245,12 +244,13 @@ def triangulate(anchors, tag_id, positions, uid):
     )
 
     logger['level'] = 'SUCCESS'
+    logger['message'] = ''
     logger['coords'] = data
     print(json.dumps(logger))
 
     return 0
 
-def time_check(s_a, u, l):
+def time_check(s_a, l, logger):
     time_diff = s_a[0]['ts'] - s_a[l]['ts']
     if time_diff < TIME_DIFFERENCE:
         return True
@@ -262,6 +262,8 @@ def time_check(s_a, u, l):
 
 
 def lambda_handler(event, context):
+    logger = {}
+
     # get tags and anchors
     data = json.loads(event['Records'][0]['Sns']['Message'])
 
@@ -296,8 +298,8 @@ def lambda_handler(event, context):
 
         if a_len == 4:
             # check the 4 we have
-            if time_check(time_sort, uid, 3):
-                triangulate(time_sort, tag_id, anchor_positions, uid)
+            if time_check(time_sort, 3, logger):
+                triangulate(time_sort, tag_id, anchor_positions, uid, logger)
             else:
                 # failed due to time
                 logger['level'] = 'DEBUG'
@@ -307,20 +309,20 @@ def lambda_handler(event, context):
 
         elif a_len == 5:
             # check the 5 positions fist
-            if time_check(time_sort, uid, 4):
-                triangulate(time_sort, tag_id, anchor_positions, uid)
+            if time_check(time_sort, 4, logger):
+                triangulate(time_sort, tag_id, anchor_positions, uid, logger)
             else:
                 # 5 failed; check all length 4 distance combinations
                 for i in range(2):
                     a_sorted = sorted(dist_sort[i:i+4], key=lambda x: x['ts'], reverse=True)
-                    if time_check(a_sorted, uid, 3):
-                        triangulate(a_sorted, tag_id, anchor_positions, uid)
+                    if time_check(a_sorted, 3, logger):
+                        triangulate(a_sorted, tag_id, anchor_positions, uid, logger)
                         return
                 else:
                     # distance combinations failed due to time so sort by time len 4
                     for i in range(2):
-                        if time_check(time_sort[i:i+4], uid, 3):
-                            triangulate(time_sort[i:i+4], tag_id, anchor_positions, uid)
+                        if time_check(time_sort[i:i+4], 3, logger):
+                            triangulate(time_sort[i:i+4], tag_id, anchor_positions, uid, logger)
                             return
                     else:
                         # time sort also failed so skip this tag
@@ -331,33 +333,33 @@ def lambda_handler(event, context):
 
         elif a_len == 6:
             # check the 6 positions fist
-            if time_check(time_sort, uid, 5):
-                triangulate(time_sort, tag_id, anchor_positions, uid)
+            if time_check(time_sort, 5, logger):
+                triangulate(time_sort, tag_id, anchor_positions, uid, logger)
             else:
                 # 6 failed; check all length 5 distance combinations
                 for i in range(2):
                     a_sorted = sorted(dist_sort[i:i+5], key=lambda x: x['ts'], reverse=True)
-                    if time_check(a_sorted, uid, 4):
-                        triangulate(a_sorted, tag_id, anchor_positions, uid)
+                    if time_check(a_sorted, 4, logger):
+                        triangulate(a_sorted, tag_id, anchor_positions, uid, logger)
                         return
                 else:
                     # 5 failed; check all length 4 distance combinations
                     for i in range(3):
                         a_sorted = sorted(dist_sort[i:i+4], key=lambda x: x['ts'], reverse=True)
-                        if time_check(a_sorted, uid, 3):
-                            triangulate(a_sorted, tag_id, anchor_positions, uid)
+                        if time_check(a_sorted, 3, logger):
+                            triangulate(a_sorted, tag_id, anchor_positions, uid, logger)
                             return
                     else:
                         # distance combinations failed due to time so sort by time len 5
                         for i in range(2):
-                            if time_check(time_sort[i:i+5], uid, 4):
-                                triangulate(time_sort[i:i+5], tag_id, anchor_positions, uid)
+                            if time_check(time_sort[i:i+5], 4, logger):
+                                triangulate(time_sort[i:i+5], tag_id, anchor_positions, uid, logger)
                                 return
                         else:
                             # 5 failed; check all length 4 time combinations
                             for i in range(3):
-                                if time_check(time_sort[i:i+4], uid, 3):
-                                    triangulate(time_sort[i:i+4], tag_id, anchor_positions, uid)
+                                if time_check(time_sort[i:i+4], 3, logger):
+                                    triangulate(time_sort[i:i+4], tag_id, anchor_positions, uid, logger)
                                     return
                             else:
                                 # time sort also failed so skip this tag
