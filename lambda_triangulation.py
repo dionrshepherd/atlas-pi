@@ -41,12 +41,18 @@ class Circle(object):
         # Distance between circle centres
         if D > R1 + R2:
             logger['message'] = 'The circles do not intersect'
+            logger['level'] = 'ERROR'
+            print(json.dumps(logger))
             return "The circles do not intersect"
         elif D < math.fabs(R2 - R1):
             logger['message'] = 'No Intersect - One circle is contained within the other'
+            logger['level'] = 'ERROR'
+            print(json.dumps(logger))
             return "No Intersect - One circle is contained within the other"
         elif D == 0 and R1 == R2:
             logger['message'] = 'No Intersect - The circles are equal and coincident'
+            logger['level'] = 'ERROR'
+            print(json.dumps(logger))
             return "No Intersect - The circles are equal and coincident"
         else:
             if D == R1 + R2 or D == R1 - R2:
@@ -141,11 +147,6 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, uid, logger):
         p0_1 = np.array(c0.circle_intersect(c1, logger)[0:2])
         p0_2 = np.array(c0.circle_intersect(c2, logger)[0:2])
         p1_2 = np.array(c1.circle_intersect(c2, logger)[0:2])
-
-        if type(p0_1) is str or type(p0_2) is str or type(p1_2) is str:
-            logger['level'] = 'ERROR'
-            print(json.dumps(logger))
-
         closest01_02 = find_two_closest(p0_1, p0_2)
         closest01_12 = find_two_closest(p0_1, p1_2)
         p0 = p0_1[closest01_02[0]]
@@ -244,6 +245,7 @@ def triangulate(anchors, tag_id, positions, uid, logger):
     )
 
     logger['level'] = 'SUCCESS'
+    logger['anchors'] = anchors
     logger['message'] = ''
     logger['coords'] = data
     print(json.dumps(logger))
@@ -255,8 +257,7 @@ def time_check(s_a, l, logger):
     if time_diff < TIME_DIFFERENCE:
         return True
     else:
-        logger['level'] = 'DEBUG'
-        logger['message'] = '{} is greater than set time difference of {}'.format(time_diff, TIME_DIFFERENCE)
+        logger['failedTimeChecks'].append('{} is greater than set time difference of {}'.format(time_diff, TIME_DIFFERENCE))
         print(json.dumps(logger))
         return False
 
@@ -285,6 +286,7 @@ def lambda_handler(event, context):
     logger['uuid'] = uid
     logger['tagId'] = tag_id
     logger['anchors'] = anchors
+    logger['failedTimeChecks'] = []
 
     if a_len < 4:
         logger['level'] = 'INFO'
