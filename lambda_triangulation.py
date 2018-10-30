@@ -12,6 +12,8 @@ sns_client = boto3.client('sns', region_name='ap-southeast-2')
 iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
 db_resource = boto3.resource('dynamodb')
 table = db_resource.Table('atlas_dev_anchor_location')
+logger = {}
+TIME_DIFFERENCE = 0.3
 
 
 ## Circle class; used for finding the intersection points of two circles
@@ -39,13 +41,13 @@ class Circle(object):
         D = round(math.sqrt(Dx**2 + Dy**2), PRECISION)
         # Distance between circle centres
         if D > R1 + R2:
-            print('INFO: The circles do not intersect; id: {}'.format(uid))
+            logger['message'] = 'The circles do not intersect'
             return "The circles do not intersect"
         elif D < math.fabs(R2 - R1):
-            print('INFO: No Intersect - One circle is contained within the other; id: {}'.format(uid))
+            logger['message'] = 'No Intersect - One circle is contained within the other'
             return "No Intersect - One circle is contained within the other"
         elif D == 0 and R1 == R2:
-            print('INFO: No Intersect - The circles are equal and coincident; id: {}'.format(uid))
+            logger['message'] = 'No Intersect - The circles are equal and coincident'
             return "No Intersect - The circles are equal and coincident"
         else:
             if D == R1 + R2 or D == R1 - R2:
@@ -140,6 +142,11 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, uid):
         p0_1 = np.array(c0.circle_intersect(c1, uid)[0:2])
         p0_2 = np.array(c0.circle_intersect(c2, uid)[0:2])
         p1_2 = np.array(c1.circle_intersect(c2, uid)[0:2])
+
+        if type(p0_1) is str or type(p0_2) is str or type(p1_2) is str:
+            logger['level'] = 'ERROR'
+            print(json.dumps(logger))
+
         closest01_02 = find_two_closest(p0_1, p0_2)
         closest01_12 = find_two_closest(p0_1, p1_2)
         p0 = p0_1[closest01_02[0]]
@@ -222,17 +229,6 @@ def triangulate(anchors, tag_id, positions, uid):
         "z": time.time()
     }
 
-    # debugging
-    print(json.dumps({
-        "id": str(uid),
-        "coords": data,
-    }))
-    # print(json.dumps({
-    #     "id": u,
-    #     "anchors": s_a,
-    #     "length": len(s_a)
-    # }))
-
     iot_data_client.publish(
         topic='atlasDevTagCoords',
         payload=json.dumps(data)
@@ -247,14 +243,21 @@ def triangulate(anchors, tag_id, positions, uid):
         TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
         Message=json.dumps(data)
     )
+
+    logger['level'] = 'SUCCESS'
+    logger['coords'] = data
+    print(json.dumps(logger))
+
     return 0
 
 def time_check(s_a, u, l):
     time_diff = s_a[0]['ts'] - s_a[l]['ts']
-    if time_diff < 0.3:
+    if time_diff < TIME_DIFFERENCE:
         return True
     else:
-        print('id: {}, bad set with time diff of {}'.format(u, time_diff))
+        logger['level'] = 'DEBUG'
+        logger['message'] = '{} is greater than set time difference of {}'.format(time_diff, TIME_DIFFERENCE)
+        print(json.dumps(logger))
         return False
 
 
@@ -275,13 +278,19 @@ def lambda_handler(event, context):
     tag_id = data['id']
     anchors = data['anchors']
     a_len = len(anchors)
+    uid = str(uuid.uuid4())
+
+    logger['uuid'] = uid
+    logger['tagId'] = tag_id
+    logger['anchors'] = anchors
 
     if a_len < 4:
-        print('not enough anchor points for accurate triangulation')
+        logger['level'] = 'INFO'
+        logger['message'] = 'not enough anchor points for accurate triangulation'
+        print(json.dumps(logger))
         return
 
     else:
-        uid = str(uuid.uuid4())
         dist_sort = sorted(anchors,key=lambda x: x['dist'], reverse=True)
         time_sort = sorted(anchors, key=lambda x: x['ts'], reverse=True)
 
@@ -291,7 +300,9 @@ def lambda_handler(event, context):
                 triangulate(time_sort, tag_id, anchor_positions, uid)
             else:
                 # failed due to time
-                print('skipped: {}'.format(tag_id))
+                logger['level'] = 'DEBUG'
+                logger['message'] = 'Tag skipped'
+                print(json.dumps(logger))
                 return
 
         elif a_len == 5:
@@ -313,20 +324,20 @@ def lambda_handler(event, context):
                             return
                     else:
                         # time sort also failed so skip this tag
-                        print('skipped: {}'.format(tag_id))
+                        logger['level'] = 'DEBUG'
+                        logger['message'] = 'Tag skipped'
+                        print(json.dumps(logger))
                         return
 
         elif a_len == 6:
             # check the 6 positions fist
             if time_check(time_sort, uid, 5):
-                print('good')
                 triangulate(time_sort, tag_id, anchor_positions, uid)
             else:
                 # 6 failed; check all length 5 distance combinations
                 for i in range(2):
                     a_sorted = sorted(dist_sort[i:i+5], key=lambda x: x['ts'], reverse=True)
                     if time_check(a_sorted, uid, 4):
-                        print('good')
                         triangulate(a_sorted, tag_id, anchor_positions, uid)
                         return
                 else:
@@ -334,26 +345,25 @@ def lambda_handler(event, context):
                     for i in range(3):
                         a_sorted = sorted(dist_sort[i:i+4], key=lambda x: x['ts'], reverse=True)
                         if time_check(a_sorted, uid, 3):
-                            print('good')
                             triangulate(a_sorted, tag_id, anchor_positions, uid)
                             return
                     else:
                         # distance combinations failed due to time so sort by time len 5
                         for i in range(2):
                             if time_check(time_sort[i:i+5], uid, 4):
-                                print('bad')
                                 triangulate(time_sort[i:i+5], tag_id, anchor_positions, uid)
                                 return
                         else:
                             # 5 failed; check all length 4 time combinations
                             for i in range(3):
                                 if time_check(time_sort[i:i+4], uid, 3):
-                                    print('bad')
                                     triangulate(time_sort[i:i+4], tag_id, anchor_positions, uid)
                                     return
                             else:
                                 # time sort also failed so skip this tag
-                                print('skipped: {}'.format(tag_id))
+                                logger['level'] = 'DEBUG'
+                                logger['message'] = 'Tag skipped'
+                                print(json.dumps(logger))
                                 return
 
         else:
