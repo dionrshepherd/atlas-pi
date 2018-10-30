@@ -284,8 +284,8 @@ def lambda_handler(event, context):
 
     else:
         uid = str(uuid.uuid4())
-        dist_sort = anchors.sort(key=lambda x: x['dist'], reverse=True)
-        time_sort = anchors.sort(key=lambda x: x['ts'], reverse=True)
+        dist_sort = sorted(anchors,key=lambda x: x['dist'], reverse=True)
+        time_sort = sorted(anchors, key=lambda x: x['ts'], reverse=True)
 
         if a_len == 4:
             # check the 4 we have
