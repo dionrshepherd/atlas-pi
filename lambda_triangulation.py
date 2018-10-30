@@ -245,9 +245,7 @@ def triangulate(anchors, tag_id, positions, uid):
     return 0
 
 def time_check(s_a, u, l):
-    s_a.sort(key=lambda x: x['ts'], reverse=True)
     time_diff = s_a[0]['ts'] - s_a[l]['ts']
-
     if time_diff < 0.3:
         print(json.dumps({
             "id": u,
@@ -281,65 +279,98 @@ def lambda_handler(event, context):
     if a_len < 4:
         print('not enough anchor points for accurate triangulation')
         return
+
     else:
         uid = str(uuid.uuid4())
-        anchors.sort(key=lambda x: x['dist'], reverse=True)
+        dist_sort = anchors.sort(key=lambda x: x['dist'], reverse=True)
+        time_sort = anchors.sort(key=lambda x: x['ts'], reverse=True)
 
         if a_len == 4:
-            if time_check(anchors, uid, 3):
-                triangulate(anchors, tag_id, anchor_positions, uid)
+            # check the 4 we have
+            if time_check(time_sort, uid, 3):
+                triangulate(time_sort, tag_id, anchor_positions, uid)
             else:
+                # failed due to time
                 print('skipped: {}'.format(tag_id))
                 return
+
         elif a_len == 5:
-            if time_check(anchors, uid, 4):
-                triangulate(anchors, tag_id, anchor_positions, uid)
+            # check the 5 positions fist
+            if time_check(time_sort, uid, 4):
+                triangulate(time_sort, tag_id, anchor_positions, uid)
             else:
-                for i in range(0, a_len - 3):
-                    sorted_anchors = anchors[i:i+4]
-                    if time_check(sorted_anchors, uid, 3):
-                        triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+                # 5 failed; check all length 4 distance combinations
+                for i in range(2):
+                    if time_check(dist_sort[i:i+3], uid, 3):
+                        triangulate(dist_sort[i:i+3], tag_id, anchor_positions, uid)
                         return
                 else:
-                    print('skipped: {}'.format(tag_id))
-                    return
-        elif a_len == 6:
-            if time_check(anchors, uid, 5):
-                triangulate(anchors, tag_id, anchor_positions, uid)
-            else:
-                for i in range(0, a_len - 4):
-                    sorted_anchors = anchors[i:i+5]
-                    if time_check(sorted_anchors, uid, 4):
-                        triangulate(sorted_anchors, tag_id, anchor_positions, uid)
-                        return
-                else:
-                    for i in range(0, a_len - 3):
-                        sorted_anchors = anchors[i:i+4]
-                        if time_check(sorted_anchors, uid, 3):
-                            triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+                    # distance combinations failed due to time so sort by time len 4
+                    for i in range(2):
+                        if time_check(time_sort[i:i+3], uid, 3):
+                            triangulate(time_sort[i:i+3], tag_id, anchor_positions, uid)
                             return
                     else:
+                        # time sort also failed so skip this tag
                         print('skipped: {}'.format(tag_id))
                         return
 
-        else:
-            for i in range(0, a_len - 5):
-                sorted_anchors = anchors[i:i+6]
-                if time_check(sorted_anchors, uid, 5):
-                    triangulate(sorted_anchors, tag_id, anchor_positions, uid)
-                    return
+        elif a_len == 6:
+            # check the 6 positions fist
+            if time_check(time_sort, uid, 4):
+                triangulate(time_sort, tag_id, anchor_positions, uid)
             else:
-                for i in range(0, a_len - 4):
-                    sorted_anchors = anchors[i:i+5]
-                    if time_check(sorted_anchors, uid, 4):
-                        triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+                # 6 failed; check all length 5 distance combinations
+                for i in range(2):
+                    if time_check(dist_sort[i:i+4], uid, 4):
+                        triangulate(dist_sort[i:i+4], tag_id, anchor_positions, uid)
                         return
                 else:
-                    for i in range(0, a_len - 3):
-                        sorted_anchors = anchors[i:i+4]
-                        if time_check(sorted_anchors, uid, 3):
-                            triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+                    # 5 failed; check all length 4 distance combinations
+                    for i in range(3):
+                        if time_check(dist_sort[i:i+3], uid, 3):
+                            triangulate(dist_sort[i:i+3], tag_id, anchor_positions, uid)
                             return
                     else:
-                        print('skipped: {}'.format(tag_id))
-                        return
+                        # distance combinations failed due to time so sort by time len 5
+                        for i in range(2):
+                            if time_check(time_sort[i:i+4], uid, 4):
+                                triangulate(time_sort[i:i+4], tag_id, anchor_positions, uid)
+                                return
+                        else:
+                            # 5 failed; check all length 4 time combinations
+                            for i in range(3):
+                                if time_check(time_sort[i:i+3], uid, 3):
+                                    triangulate(time_sort[i:i+3], tag_id, anchor_positions, uid)
+                                    return
+                            else:
+                                # time sort also failed so skip this tag
+                                print('skipped: {}'.format(tag_id))
+                                return
+
+        else:
+            print('should never be more than 6 for now')
+            # dist_sort = dist_sort
+            # if time_check(dist_sort, uid, 5):
+            #     triangulate(dist_sort, tag_id, anchor_positions, uid)
+            # else
+            # for i in range(0, a_len - 5):
+            #     sorted_anchors = anchors[i:i+6]
+            #     if time_check(sorted_anchors, uid, 5):
+            #         triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+            #         return
+            # else:
+            #     for i in range(0, a_len - 4):
+            #         sorted_anchors = anchors[i:i+5]
+            #         if time_check(sorted_anchors, uid, 4):
+            #             triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+            #             return
+            #     else:
+            #         for i in range(0, a_len - 3):
+            #             sorted_anchors = anchors[i:i+4]
+            #             if time_check(sorted_anchors, uid, 3):
+            #                 triangulate(sorted_anchors, tag_id, anchor_positions, uid)
+            #                 return
+            #         else:
+            #             print('skipped: {}'.format(tag_id))
+            #             return
