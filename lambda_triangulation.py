@@ -227,6 +227,11 @@ def triangulate(anchors, tag_id, positions, uid):
         "id": str(uid),
         "coords": data,
     }))
+    # print(json.dumps({
+    #     "id": u,
+    #     "anchors": s_a,
+    #     "length": len(s_a)
+    # }))
 
     iot_data_client.publish(
         topic='atlasDevTagCoords',
@@ -245,15 +250,8 @@ def triangulate(anchors, tag_id, positions, uid):
     return 0
 
 def time_check(s_a, u, l):
-    print(s_a)
-    print(l)
     time_diff = s_a[0]['ts'] - s_a[l]['ts']
     if time_diff < 0.3:
-        print(json.dumps({
-            "id": u,
-            "anchors": s_a,
-            "length": len(s_a)
-        }))
         return True
     else:
         print('id: {}, bad set with time diff of {}'.format(u, time_diff))
@@ -321,12 +319,14 @@ def lambda_handler(event, context):
         elif a_len == 6:
             # check the 6 positions fist
             if time_check(time_sort, uid, 5):
+                print('good')
                 triangulate(time_sort, tag_id, anchor_positions, uid)
             else:
                 # 6 failed; check all length 5 distance combinations
                 for i in range(2):
                     a_sorted = sorted(dist_sort[i:i+5], key=lambda x: x['ts'], reverse=True)
                     if time_check(a_sorted, uid, 4):
+                        print('good')
                         triangulate(a_sorted, tag_id, anchor_positions, uid)
                         return
                 else:
@@ -334,18 +334,21 @@ def lambda_handler(event, context):
                     for i in range(3):
                         a_sorted = sorted(dist_sort[i:i+4], key=lambda x: x['ts'], reverse=True)
                         if time_check(a_sorted, uid, 3):
+                            print('good')
                             triangulate(a_sorted, tag_id, anchor_positions, uid)
                             return
                     else:
                         # distance combinations failed due to time so sort by time len 5
                         for i in range(2):
                             if time_check(time_sort[i:i+5], uid, 4):
+                                print('bad')
                                 triangulate(time_sort[i:i+5], tag_id, anchor_positions, uid)
                                 return
                         else:
                             # 5 failed; check all length 4 time combinations
                             for i in range(3):
                                 if time_check(time_sort[i:i+4], uid, 3):
+                                    print('bad')
                                     triangulate(time_sort[i:i+4], tag_id, anchor_positions, uid)
                                     return
                             else:
