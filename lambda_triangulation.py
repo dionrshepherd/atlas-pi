@@ -355,27 +355,3 @@ def lambda_handler(event, context):
 
         else:
             print('should never be more than 6 for now')
-            # dist_sort = dist_sort
-            # if time_check(dist_sort, uid, 5):
-            #     triangulate(dist_sort, tag_id, anchor_positions, uid)
-            # else
-            # for i in range(0, a_len - 5):
-            #     sorted_anchors = anchors[i:i+6]
-            #     if time_check(sorted_anchors, uid, 5):
-            #         triangulate(sorted_anchors, tag_id, anchor_positions, uid)
-            #         return
-            # else:
-            #     for i in range(0, a_len - 4):
-            #         sorted_anchors = anchors[i:i+5]
-            #         if time_check(sorted_anchors, uid, 4):
-            #             triangulate(sorted_anchors, tag_id, anchor_positions, uid)
-            #             return
-            #     else:
-            #         for i in range(0, a_len - 3):
-            #             sorted_anchors = anchors[i:i+4]
-            #             if time_check(sorted_anchors, uid, 3):
-            #                 triangulate(sorted_anchors, tag_id, anchor_positions, uid)
-            #                 return
-            #         else:
-            #             print('skipped: {}'.format(tag_id))
-            #             return
