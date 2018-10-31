@@ -105,35 +105,13 @@ try:
                         dist_diff = abs(float(current_data[1]) - float(previous_data[1]["dist"]))
                         time_diff = abs(float(timeStamp) - float(previous_data[1]["ts"]))
                         if dist_diff > 1.5 and time_diff < 0.8:
-                            put_to_db(previous_data[1]["ts"], previous_data[1]["id"], previous_data[1]["dist"], anchorId)
+                            put_to_db(timeStamp, previous_data[1]["id"], previous_data[1]["dist"], anchorId)
                         else:
                             previous_tic_tags[previous_data[0]] = seen_tag
                             put_to_db(timeStamp, current_data[0], current_data[1], anchorId)
                     else:
                         previous_tic_tags.append(seen_tag)
                         put_to_db(timeStamp, current_data[0], current_data[1], anchorId)
-        #             if previous_data[0] > -1:
-        #                 dist_diff = abs(float(current_data[1]) - float(previous_data[1]["dist"]))
-        #                 previous_tic_tags[previous_data[0]] = seen_tag
-        #
-        #                 if dist_diff > max_dist:
-        #                     max_dist = dist_diff
-        #                     idx_of_max_dist = index
-        #                     idx_of_previous_value = previous_data[0]
-        #                     tag_data_of_previous = previous_data[1]
-        #             else:
-        #                 previous_tic_tags.append(seen_tag)
-        #
-        #             current_tags.append(seen_tag)
-        #             index = index + 1
-        #
-        # if idx_of_max_dist > -1 and idx_of_previous_value > -1 and current_tags > 4:
-        #     del current_tags[idx_of_max_dist]
-        #     previous_tic_tags[idx_of_previous_value] = tag_data_of_previous
-        #
-        # for t in current_tags:
-        #     put_to_db(t["ts"], t["id"], t["dist"], anchorId)
-
 
 except KeyboardInterrupt:
     print('...Closing...')
