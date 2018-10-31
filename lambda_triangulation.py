@@ -258,7 +258,6 @@ def time_check(s_a, l, logger):
         return True
     else:
         logger['failedTimeChecks'].append('{} is greater than set time difference of {}'.format(time_diff, TIME_DIFFERENCE))
-        print(json.dumps(logger))
         return False
 
 
