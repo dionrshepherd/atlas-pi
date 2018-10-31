@@ -152,7 +152,7 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, logger):
             if sphere_intersect(anchorA, rA, anchorB, rB):
                 cA = Circle(anchorA[0], anchorA[1], rA)
                 cB = Circle(anchorB[0], anchorB[1], rB)
-                candidates.append((np.array(cA.circle_intersect(cB)[0]), np.array(cA.circle_intersect(cB)[1])))
+                candidates.append((np.array(cA.circle_intersect(cB, logger)[0]), np.array(cA.circle_intersect(cB, logger)[1])))
             else:
                 dist = calc_dist(anchorA, anchorB)
                 if dist > (rA + rB):
