@@ -115,16 +115,13 @@ def find_two_closest(pointsA, pointsB):
 
 # Given three intersecting spheres, find the two points of intersection
 def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, logger):
-    if not (sphere_intersect(anchor0, r0, anchor1, r1, r0, r1) and sphere_intersect(anchor0, r0, anchor2, r2, r0, r1) and sphere_intersect(anchor1, r1, anchor2, r2, r0, r1)):
-        return([])
-
     anchor0_mod = np.subtract(anchor0, anchor0)
     anchor1_mod = np.subtract(anchor1, anchor0)
     anchor2_mod = np.subtract(anchor2, anchor0)
 
-    e_x = (np.subtract(anchor1_mod, anchor0_mod)) / calc_dist(anchor0_mod, anchor1_mod)
-    i = np.sum(e_x * (np.subtract(anchor2_mod, anchor0_mod)))
-    e_y = (np.subtract(anchor2_mod, anchor0_mod) - i*e_x) / calc_dist(np.subtract(anchor2_mod, anchor0_mod), i*e_x)
+    e_x = (anchor1_mod - anchor0_mod) / calc_dist(anchor0_mod, anchor1_mod)
+    i = np.sum(e_x * (anchor2_mod - anchor0_mod))
+    e_y = (anchor2_mod - anchor0_mod - i*e_x) / calc_dist(anchor2_mod - anchor0_mod, i*e_x)
     e_z = np.array((e_x[1]*e_y[2] - e_x[2]*e_y[1], e_x[2]*e_y[0] - e_x[0]*e_y[2], e_x[0]*e_y[1] - e_x[1]*e_y[0]))
 
     anchor0_mod = np.array((np.sum(anchor0_mod*e_x), np.sum(anchor0_mod*e_y), np.sum(anchor0_mod*e_z)))
@@ -134,7 +131,53 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, logger):
     x = (r0**2 - r1**2 + anchor1_mod[0]**2) / (2 * anchor1_mod[0])
     y = ((r0**2 - r2**2 + anchor2_mod[0]**2 + anchor2_mod[1]**2) / (2 * anchor2_mod[1])) - ((x * anchor2_mod[0]) / anchor2_mod[1])
 
-    if (r0**2 - x**2 - y**2) >= 0:
+    if not (sphere_intersect(anchor0, r0, anchor1, r1) and sphere_intersect(anchor0, r0, anchor2, r2) and sphere_intersect(anchor1, r1, anchor2, r2)):
+        candidates = []
+        selections = []
+        for B in [(anchor0_mod, r0, anchor1_mod, r1), (anchor0_mod, r0, anchor2_mod, r2), (anchor1_mod, r1, anchor2_mod, r2)]:
+            anchorA = np.array([])
+            anchorB = np.array([])
+            rA = 0
+            rB = 0
+            if B[1] > B[3]:
+                anchorA = B[0]
+                anchorB = B[2]
+                rA = B[1]
+                rB = B[3]
+            else:
+                anchorA = B[2]
+                anchorB = B[0]
+                rA = B[3]
+                rB = B[1]
+            if sphere_intersect(anchorA, rA, anchorB, rB):
+                cA = Circle(anchorA[0], anchorA[1], rA)
+                cB = Circle(anchorB[0], anchorB[1], rB)
+                candidates.append((np.array(cA.circle_intersect(cB)[0]), np.array(cA.circle_intersect(cB)[1])))
+            else:
+                dist = calc_dist(anchorA, anchorB)
+                if dist > (rA + rB):
+                    vec_A_to_B = anchorB - anchorA
+                    unit_vec_A_to_B = vec_A_to_B / np.sum(vec_A_to_B**2)**.5
+                    edgeA = anchorA + rA*unit_vec_A_to_B
+                    edgeB = anchorB - rB*unit_vec_A_to_B
+                    selections.append(np.mean((edgeA, edgeB), axis = 0)[0:2])
+                else:
+                    vec_A_to_B = anchorB - anchorA
+                    unit_vec_A_to_B = vec_A_to_B / np.sum(vec_A_to_B**2)**.5
+                    edgeA = anchorA + rA*unit_vec_A_to_B
+                    edgeB = anchorB + rB*unit_vec_A_to_B
+                    selections.append(np.mean((edgeA, edgeB), axis = 0)[0:2])
+        for candidate in candidates:
+            dist0 = calc_dist(candidate[0], selections[0])
+            dist1 = calc_dist(candidate[1], selections[0])
+            if dist0 < dist1:
+                selections.append(candidate[0])
+            else:
+                selections.append(candidate[1])
+        ave_point = np.mean(selections, axis=0)
+        ave_point = anchor0 + ave_point[0]*e_x + ave_point[1]*e_y
+        return(ave_point)
+    elif (r0**2 - x**2 - y**2) >= 0:
         z_pos = np.sqrt(r0**2 - x**2 - y**2)
         z_neg = -1 * np.sqrt(r0**2 - x**2 - y**2)
         p0 = anchor0 + x*e_x + y*e_y + z_pos*e_z
@@ -144,9 +187,9 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, logger):
         c0 = Circle(0, 0, r0)
         c1 = Circle(anchor1_mod[0], 0, r1)
         c2 = Circle(anchor2_mod[0], anchor2_mod[1], r2)
-        p0_1 = np.array(c0.circle_intersect(c1, logger)[0:2])
-        p0_2 = np.array(c0.circle_intersect(c2, logger)[0:2])
-        p1_2 = np.array(c1.circle_intersect(c2, logger)[0:2])
+        p0_1 = np.array(c0.circle_intersect(c1)[0:2])
+        p0_2 = np.array(c0.circle_intersect(c2)[0:2])
+        p1_2 = np.array(c1.circle_intersect(c2)[0:2])
         closest01_02 = find_two_closest(p0_1, p0_2)
         closest01_12 = find_two_closest(p0_1, p1_2)
         p0 = p0_1[closest01_02[0]]
