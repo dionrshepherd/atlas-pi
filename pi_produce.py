@@ -23,9 +23,9 @@ def put_to_db(time_stamp, tag_id, distance, anchor_id):
     return
 
 
-def get_tag_index(id, tags):
+def get_tag_index(id_to_check, tags):
     for i, t in enumerate(tags):
-        if t['id'] == id:
+        if t['id'] == id_to_check:
             return i, t
     return -1, {}
 
@@ -40,7 +40,6 @@ dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('atlas_dev')
 init_tag = 'CC18'
 previous_tic_tags = []
-current_tags = []
 
 
 print('...Opening serial port...')
@@ -105,6 +104,11 @@ try:
                         dist_diff = abs(float(current_data[1]) - float(previous_data[1]["dist"]))
                         time_diff = abs(float(timeStamp) - float(previous_data[1]["ts"]))
                         if dist_diff > 1.5 and time_diff < 0.8:
+                            previous_tic_tags[previous_data[0]] = {
+                                "id": previous_data[1]["id"],
+                                "dist": previous_data[1]["dist"],
+                                "ts": timeStamp
+                            }
                             put_to_db(timeStamp, previous_data[1]["id"], previous_data[1]["dist"], anchorId)
                         else:
                             previous_tic_tags[previous_data[0]] = seen_tag
