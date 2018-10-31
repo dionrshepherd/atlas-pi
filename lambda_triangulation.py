@@ -114,7 +114,7 @@ def find_two_closest(pointsA, pointsB):
 
 
 # Given three intersecting spheres, find the two points of intersection
-def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, uid, logger):
+def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, logger):
     if not (sphere_intersect(anchor0, r0, anchor1, r1, r0, r1) and sphere_intersect(anchor0, r0, anchor2, r2, r0, r1) and sphere_intersect(anchor1, r1, anchor2, r2, r0, r1)):
         return([])
 
@@ -168,7 +168,7 @@ def triangulate(anchors, tag_id, positions, uid, logger):
     candidates = []
     selections = []
     for B in trianchors:
-        trilat = trilateration(B[0][0], B[0][1], B[1][0], B[1][1], B[2][0], B[2][1], uid, logger)
+        trilat = trilateration(B[0][0], B[0][1], B[1][0], B[1][1], B[2][0], B[2][1], logger)
         if len(trilat) == 0:
             continue
         if type(trilat) == list:
