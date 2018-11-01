@@ -30,14 +30,13 @@ class Circle(object):
         as proposed by Paul Bourke, 1997.
         http://paulbourke.net/geometry/circlesphere/
         """
-        PRECISION = 8
         X1, Y1 = self.xpos, self.ypos
         X2, Y2 = circle2.xpos, circle2.ypos
         R1, R2 = self.radius, circle2.radius
 
         Dx = X2-X1
         Dy = Y2-Y1
-        D = round(math.sqrt(Dx**2 + Dy**2), PRECISION)
+        D = math.sqrt(Dx**2 + Dy**2)
         # Distance between circle centres
         if D > R1 + R2:
             logger['message'] = 'The circles do not intersect'
@@ -64,14 +63,12 @@ class Circle(object):
             halfchordlength = math.sqrt(R1**2 - chorddistance**2)
             chordmidpointx = X1 + (chorddistance*Dx)/D
             chordmidpointy = Y1 + (chorddistance*Dy)/D
-            I1 = (round(chordmidpointx + (halfchordlength*Dy)/D, PRECISION),
-                  round(chordmidpointy - (halfchordlength*Dx)/D, PRECISION))
-            theta1 = round(math.degrees(math.atan2(I1[1]-Y1, I1[0]-X1)),
-                           PRECISION)
-            I2 = (round(chordmidpointx - (halfchordlength*Dy)/D, PRECISION),
-                  round(chordmidpointy + (halfchordlength*Dx)/D, PRECISION))
-            theta2 = round(math.degrees(math.atan2(I2[1]-Y1, I2[0]-X1)),
-                           PRECISION)
+            I1 = (chordmidpointx + (halfchordlength*Dy)/D,
+                  chordmidpointy - (halfchordlength*Dx)/D)
+            theta1 = math.degrees(math.atan2(I1[1]-Y1, I1[0]-X1))
+            I2 = (chordmidpointx - (halfchordlength*Dy)/D,
+                  chordmidpointy + (halfchordlength*Dx)/D)
+            theta2 = math.degrees(math.atan2(I2[1]-Y1, I2[0]-X1))
             if theta2 > theta1:
                 I1, I2 = I2, I1
             return (I1, I2, CASE)
@@ -90,7 +87,7 @@ def calc_dist(p0, p1):
 ## Do two spheres intersect?
 def sphere_intersect(anchorA, rA, anchorB, rB):
     dist = calc_dist(anchorA, anchorB)
-    if dist > (rA + rB) or (dist + rB) < rA or (dist + rA) < rB:
+    if dist >= (rA + rB) or (dist + rA) <= rB or (dist + rB) <= rA:
         return False
     else:
         return True
