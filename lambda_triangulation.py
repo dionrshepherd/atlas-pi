@@ -12,7 +12,7 @@ sns_client = boto3.client('sns', region_name='ap-southeast-2')
 iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
 db_resource = boto3.resource('dynamodb')
 table = db_resource.Table('atlas_dev_anchor_location')
-TIME_DIFFERENCE = 0.3
+TIME_DIFFERENCE = 0.4
 
 
 ## Circle class; used for finding the intersection points of two circles
@@ -153,12 +153,14 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, logger):
             else:
                 dist = calc_dist(anchorA, anchorB)
                 if dist > (rA + rB):
+                    logger['circleIntersects'] = 'No intersect but far apart'
                     vec_A_to_B = anchorB - anchorA
                     unit_vec_A_to_B = vec_A_to_B / np.sum(vec_A_to_B**2)**.5
                     edgeA = anchorA + rA*unit_vec_A_to_B
                     edgeB = anchorB - rB*unit_vec_A_to_B
                     selections.append(np.mean((edgeA, edgeB), axis = 0)[0:2])
                 else:
+                    logger['circleIntersects'] = 'Sphere within a sphere'
                     vec_A_to_B = anchorB - anchorA
                     unit_vec_A_to_B = vec_A_to_B / np.sum(vec_A_to_B**2)**.5
                     edgeA = anchorA + rA*unit_vec_A_to_B
@@ -175,12 +177,14 @@ def trilateration(anchor0, r0, anchor1, r1, anchor2, r2, logger):
         ave_point = anchor0 + ave_point[0]*e_x + ave_point[1]*e_y
         return(ave_point)
     elif (r0**2 - x**2 - y**2) >= 0:
+        logger['circleIntersects'] = 'Other'
         z_pos = np.sqrt(r0**2 - x**2 - y**2)
         z_neg = -1 * np.sqrt(r0**2 - x**2 - y**2)
         p0 = anchor0 + x*e_x + y*e_y + z_pos*e_z
         p1 = anchor0 + x*e_x + y*e_y + z_neg*e_z
         return([p0, p1])
     else:
+        logger['circleIntersects'] = 'Normal'
         c0 = Circle(0, 0, r0)
         c1 = Circle(anchor1_mod[0], 0, r1)
         c2 = Circle(anchor2_mod[0], anchor2_mod[1], r2)
@@ -292,6 +296,7 @@ def triangulate(anchors, tag_id, positions, logger):
 
     return 0
 
+
 def time_check(s_a, l, logger):
     time_diff = s_a[0]['ts'] - s_a[l]['ts']
     if time_diff < TIME_DIFFERENCE:
@@ -326,6 +331,7 @@ def lambda_handler(event, context):
     logger['tagId'] = tag_id
     logger['anchors'] = anchors
     logger['failedTimeChecks'] = []
+    logger['circleIntersects'] = ''
 
     if a_len < 4:
         logger['level'] = 'INFO'
