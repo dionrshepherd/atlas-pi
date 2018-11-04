@@ -13,6 +13,8 @@ def put_to_db(time_stamp, tag_id, distance, anchor_id):
         'dist': distance,
     }
 
+    # put a try catch around this block
+    # got a botocore Validation exception
     table.put_item(
         Item={
             'anchor': anchor_id,
@@ -38,7 +40,6 @@ print('...Anchor ID: ' + anchorId + '...')
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('atlas_dev')
-init_tag = 'CC18'
 previous_tic_tags = []
 
 
@@ -67,6 +68,8 @@ time.sleep(0.5)
 # clear the buffer 
 ser.readline()
 time.sleep(2)
+ser.readline()
+ser.readline()
 ser.flushInput()
 
 # keep reading positions
@@ -82,41 +85,32 @@ try:
         # set timestamp arrays
         timeStamp = time.time()
 
-        # loop variables
-        max_dist = 0
-        index = 0
-        idx_of_max_dist = -1
-        idx_of_previous_value = -1
-        tag_data_of_previous = {}
-
         # split array of tags
         for pos in positions:
             current_data = pos.split('=')
             if len(current_data) == 2:
-                if current_data[0] != init_tag and len(current_data[0]) == 4:
-                    seen_tag = {
-                        "id": current_data[0],
-                        "dist": current_data[1],
-                        "ts": timeStamp
-                    }
-                    put_to_db(timeStamp, current_data[0], current_data[1], anchorId)
+                if len(current_data[0]) == 4 and len(current_data[1]) > 0 :
+                    # seen_tag = {
+                    #     "id": current_data[0],
+                    #     "dist": current_data[1],
+                    #     "ts": timeStamp
+                    # }
                     # previous_data = get_tag_index(current_data[0], previous_tic_tags)
                     # if previous_data[0] > -1:
-                    #     dist_diff = abs(float(current_data[1]) - float(previous_data[1]["dist"]))
-                    #     time_diff = abs(float(timeStamp) - float(previous_data[1]["ts"]))
-                    #     if dist_diff > 1.5 and time_diff < 0.8:
-                    #         previous_tic_tags[previous_data[0]] = {
-                    #             "id": previous_data[1]["id"],
-                    #             "dist": previous_data[1]["dist"],
-                    #             "ts": timeStamp
-                    #         }
-                    #         put_to_db(timeStamp, previous_data[1]["id"], previous_data[1]["dist"], anchorId)
-                    #     else:
-                    #         previous_tic_tags[previous_data[0]] = seen_tag
-                    #         put_to_db(timeStamp, current_data[0], current_data[1], anchorId)
+                    # #     if dist_diff > 1.5 and time_diff < 0.8:
+                    # #         previous_tic_tags[previous_data[0]] = {
+                    # #             "id": previous_data[1]["id"],
+                    # #             "dist": previous_data[1]["dist"],
+                    # #             "ts": timeStamp
+                    # #         }
+                    # #         put_to_db(timeStamp, previous_data[1]["id"], previous_data[1]["dist"], anchorId)
+                    # #     else:
+                    # #         previous_tic_tags[previous_data[0]] = seen_tag
+                    # #         put_to_db(timeStamp, current_data[0], current_data[1], anchorId)
                     # else:
                     #     previous_tic_tags.append(seen_tag)
                     #     put_to_db(timeStamp, current_data[0], current_data[1], anchorId)
+                    put_to_db(timeStamp, current_data[0], current_data[1], anchorId)
 
 except KeyboardInterrupt:
     print('...Closing...')

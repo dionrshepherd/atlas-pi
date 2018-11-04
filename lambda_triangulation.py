@@ -298,7 +298,7 @@ def triangulate(anchors, tag_id, positions, logger):
 
 
 def time_check(s_a, l, logger):
-    time_diff = s_a[0]['ts'] - s_a[l]['ts']
+    time_diff = s_a[0]['ts'] - s_a[l - 1]['ts']
     if time_diff < TIME_DIFFERENCE:
         return True
     else:
@@ -340,80 +340,93 @@ def lambda_handler(event, context):
         return
 
     else:
-        dist_sort = sorted(anchors,key=lambda x: x['dist'], reverse=True)
+        # dist_sort = sorted(anchors,key=lambda x: x['dist'], reverse=True)
         time_sort = sorted(anchors, key=lambda x: x['ts'], reverse=True)
 
-        if a_len == 4:
-            # check the 4 we have
-            if time_check(time_sort, 3, logger):
+        for i in range(0, a_len - 4):
+            if time_check(time_sort, a_len - i, logger):
                 triangulate(time_sort, tag_id, anchor_positions, logger)
-            else:
-                # failed due to time
-                logger['level'] = 'DEBUG'
-                logger['message'] = 'Tag skipped'
-                print(json.dumps(logger))
                 return
-
-        elif a_len == 5:
-            # check the 5 positions fist
-            if time_check(time_sort, 4, logger):
-                triangulate(time_sort, tag_id, anchor_positions, logger)
             else:
-                # 5 failed; check all length 4 distance combinations
-                for i in range(2):
-                    a_sorted = sorted(dist_sort[i:i+4], key=lambda x: x['ts'], reverse=True)
-                    if time_check(a_sorted, 3, logger):
-                        triangulate(a_sorted, tag_id, anchor_positions, logger)
-                        return
-                else:
-                    # distance combinations failed due to time so sort by time len 4
-                    for i in range(2):
-                        if time_check(time_sort[i:i+4], 3, logger):
-                            triangulate(time_sort[i:i+4], tag_id, anchor_positions, logger)
-                            return
-                    else:
-                        # time sort also failed so skip this tag
-                        logger['level'] = 'DEBUG'
-                        logger['message'] = 'Tag skipped'
-                        print(json.dumps(logger))
-                        return
-
-        elif a_len == 6:
-            # check the 6 positions fist
-            if time_check(time_sort, 5, logger):
-                triangulate(time_sort, tag_id, anchor_positions, logger)
-            else:
-                # 6 failed; check all length 5 distance combinations
-                for i in range(2):
-                    a_sorted = sorted(dist_sort[i:i+5], key=lambda x: x['ts'], reverse=True)
-                    if time_check(a_sorted, 4, logger):
-                        triangulate(a_sorted, tag_id, anchor_positions, logger)
-                        return
-                else:
-                    # 5 failed; check all length 4 distance combinations
-                    for i in range(3):
-                        a_sorted = sorted(dist_sort[i:i+4], key=lambda x: x['ts'], reverse=True)
-                        if time_check(a_sorted, 3, logger):
-                            triangulate(a_sorted, tag_id, anchor_positions, logger)
-                            return
-                    else:
-                        # distance combinations failed due to time so sort by time len 5
-                        for i in range(2):
-                            if time_check(time_sort[i:i+5], 4, logger):
-                                triangulate(time_sort[i:i+5], tag_id, anchor_positions, logger)
-                                return
-                        else:
-                            # 5 failed; check all length 4 time combinations
-                            for i in range(3):
-                                if time_check(time_sort[i:i+4], 3, logger):
-                                    triangulate(time_sort[i:i+4], tag_id, anchor_positions, logger)
-                                    return
-                            else:
-                                # time sort also failed so skip this tag
-                                logger['level'] = 'DEBUG'
-                                logger['message'] = 'Tag skipped'
-                                print(json.dumps(logger))
-                                return
-
+                time_sort.pop()
         else:
-            print('should never be more than 6 for now')
+            logger['level'] = 'DEBUG'
+            logger['message'] = 'Tag skipped'
+            print(json.dumps(logger))
+            return
+
+
+        # if a_len == 4:
+        #     # check the 4 we have
+        #     if time_check(time_sort, 3, logger):
+        #         triangulate(time_sort, tag_id, anchor_positions, logger)
+        #     else:
+        #         # failed due to time
+        #         logger['level'] = 'DEBUG'
+        #         logger['message'] = 'Tag skipped'
+        #         print(json.dumps(logger))
+        #         return
+        #
+        # elif a_len == 5:
+        #     # check the 5 positions fist
+        #     if time_check(time_sort, 4, logger):
+        #         triangulate(time_sort, tag_id, anchor_positions, logger)
+        #     else:
+        #         # 5 failed; check all length 4 distance combinations
+        #         for i in range(2):
+        #             a_sorted = sorted(dist_sort[i:i+4], key=lambda x: x['ts'], reverse=True)
+        #             if time_check(a_sorted, 3, logger):
+        #                 triangulate(a_sorted, tag_id, anchor_positions, logger)
+        #                 return
+        #         else:
+        #             # distance combinations failed due to time so sort by time len 4
+        #             for i in range(2):
+        #                 if time_check(time_sort[i:i+4], 3, logger):
+        #                     triangulate(time_sort[i:i+4], tag_id, anchor_positions, logger)
+        #                     return
+        #             else:
+        #                 # time sort also failed so skip this tag
+        #                 logger['level'] = 'DEBUG'
+        #                 logger['message'] = 'Tag skipped'
+        #                 print(json.dumps(logger))
+        #                 return
+        #
+        # elif a_len == 6:
+        #     # check the 6 positions fist
+        #     if time_check(time_sort, 5, logger):
+        #         triangulate(time_sort, tag_id, anchor_positions, logger)
+        #     else:
+        #         # 6 failed; check all length 5 distance combinations
+        #         for i in range(2):
+        #             a_sorted = sorted(dist_sort[i:i+5], key=lambda x: x['ts'], reverse=True)
+        #             if time_check(a_sorted, 4, logger):
+        #                 triangulate(a_sorted, tag_id, anchor_positions, logger)
+        #                 return
+        #         else:
+        #             # 5 failed; check all length 4 distance combinations
+        #             for i in range(3):
+        #                 a_sorted = sorted(dist_sort[i:i+4], key=lambda x: x['ts'], reverse=True)
+        #                 if time_check(a_sorted, 3, logger):
+        #                     triangulate(a_sorted, tag_id, anchor_positions, logger)
+        #                     return
+        #             else:
+        #                 # distance combinations failed due to time so sort by time len 5
+        #                 for i in range(2):
+        #                     if time_check(time_sort[i:i+5], 4, logger):
+        #                         triangulate(time_sort[i:i+5], tag_id, anchor_positions, logger)
+        #                         return
+        #                 else:
+        #                     # 5 failed; check all length 4 time combinations
+        #                     for i in range(3):
+        #                         if time_check(time_sort[i:i+4], 3, logger):
+        #                             triangulate(time_sort[i:i+4], tag_id, anchor_positions, logger)
+        #                             return
+        #                     else:
+        #                         # time sort also failed so skip this tag
+        #                         logger['level'] = 'DEBUG'
+        #                         logger['message'] = 'Tag skipped'
+        #                         print(json.dumps(logger))
+        #                         return
+        #
+        # else:
+        #     print('should never be more than 6 for now')
