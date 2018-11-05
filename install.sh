@@ -7,18 +7,18 @@ read -p '>' answer
 
 if [ "$answer" = "y" ]; then
     # install all libraries needed
-    echo "update packages"
-    sudo apt update
-    echo "install pip3 and screen"
-    sudo apt -y install python3-pip screen
-    echo "install needed python packages"
-    pip3 install setuptools
-    pip3 install awscli==1.11.18
-    pip3 install boto3
-    pip3 install pyserial
-
-    # copy bash script to root
-    cp .bashrc ../
+#    echo "update packages"
+#    sudo apt update
+#    echo "install pip3 and screen"
+#    sudo apt -y install python3-pip screen
+#    echo "install needed python packages"
+#    pip3 install setuptools
+#    pip3 install awscli==1.11.18
+#    pip3 install boto3
+#    pip3 install pyserial
+#
+#    # copy bash script to root
+#    cp .bashrc ../
 
     # copy the init script to /etc/init.d and add to default start-up scripts
     echo "copy init file"
