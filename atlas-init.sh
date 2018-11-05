@@ -26,7 +26,7 @@ case "$1" in
         # unbind sensor from usb
         echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/unbind
 
-        sleep 7.5s
+        sleep 2s
 
         # bind sensor to usb
         echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/bind

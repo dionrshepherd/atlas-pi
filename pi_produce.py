@@ -8,7 +8,7 @@ import re
 
 def put_to_db(time_stamp, tag_id, distance, anchor_id):
     print('tag: {}, distance: {}, ts: {}'.format(tag_id, distance, time_stamp))
-    open('/home/linaro/heartbeat.txt', 'w').write(str(time_stamp))
+    # open('/home/linaro/heartbeat.txt', 'w').write(str(time_stamp))
 
     payload = {
         'ts': str(time_stamp),
@@ -32,7 +32,6 @@ def get_tag_index(id_to_check, tags):
     return -1, {}
 
 
-open('/home/linaro/python_start.txt', 'w')
 anchorId = os.environ['ANCHOR_ID']
 if len(anchorId) > 4:
     print('Anchor ID has not been set in .bashrc')
