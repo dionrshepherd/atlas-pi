@@ -32,6 +32,7 @@ def get_tag_index(id_to_check, tags):
     return -1, {}
 
 
+open('../python_start.txt', 'w')
 anchorId = os.environ['ANCHOR_ID']
 if len(anchorId) > 4:
     print('Anchor ID has not been set in .bashrc')
