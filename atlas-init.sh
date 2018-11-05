@@ -11,7 +11,7 @@ case "$1" in
         echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/bind
 
         # run the produce script
-        python3 /home/linaro/atlas-pi/pi_produce.py
+        usr/bin/python3 /home/linaro/atlas-pi/pi_produce.py
 
         touch /home/linaro/start.txt
         ;;
