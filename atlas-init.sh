@@ -1,5 +1,5 @@
 #! /bin/sh
-#
+# /etc/init.d/atlas-init.sh
 ### BEGIN INIT INFO
 # Provides:          pitracker
 # Required-Start:    $all
@@ -20,9 +20,7 @@ case "$1" in
         echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/bind
 
         # run the produce script
-        /usr/bin/python3 /home/linaro/atlas-pi/pi_produce.py &
-
-        touch /home/linaro/start.txt
+        python3 /usr/local/sbin/pi_produce.py &
         ;;
     stop)
         # kill any running python scripts
@@ -30,8 +28,6 @@ case "$1" in
 
         # unbind sensor from usb
         echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/unbind
-
-        touch /home/linaro/stop.txt
         ;;
     *)
         echo "Usage: /etc/init.d/atlas-init.sh {start|stop}"
