@@ -11,14 +11,11 @@
 ### END INIT INFO
 
 # Some things that run always
-touch /var/lock/atlas-init.sh
+sudo touch /var/lock/atlas-init.sh
 
 # Carry out specific functions when asked to by the system
 case "$1" in
     start)
-        # bind sensor to usb
-        echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/bind
-
         # run the produce script
         /usr/bin/python3 /usr/local/sbin/pi_produce.py &
         ;;
@@ -27,7 +24,14 @@ case "$1" in
         pkill -9 -f pi_produce.py
 
         # unbind sensor from usb
-        echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/unbind
+        # echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/unbind
+        echo '1-1' > /sys/bus/usb/drivers/usb/unbind
+
+        sleep 5s
+
+        # bind sensor to usb
+        # echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/bind
+        echo '1-1' > /sys/bus/usb/drivers/usb/bind
         ;;
     *)
         echo "Usage: /etc/init.d/atlas-init.sh {start|stop}"
