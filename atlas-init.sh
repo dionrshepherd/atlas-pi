@@ -20,7 +20,7 @@ case "$1" in
         echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/bind
 
         # run the produce script
-        python3 /usr/local/sbin/pi_produce.py &
+        /usr/bin/python3 /usr/local/sbin/pi_produce.py &
         ;;
     stop)
         # kill any running python scripts

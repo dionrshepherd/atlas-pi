@@ -26,6 +26,7 @@ if [ "$install" = "y" ]; then
 
     fi
     # copy python script to sbin
+    echo "copy python script"
     cp /home/linaro/atlas-pi/pi_produce.py /usr/local/sbin/
 
     # copy the init script to /etc/init.d and add to default start-up scripts
