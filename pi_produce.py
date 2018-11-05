@@ -8,7 +8,7 @@ import re
 
 def put_to_db(time_stamp, tag_id, distance, anchor_id):
     print('tag: {}, distance: {}, ts: {}'.format(tag_id, distance, time_stamp))
-    open('heartbeat.txt', 'w').write(str(time_stamp))
+    open('../heartbeat.txt', 'w').write(str(time_stamp))
 
     payload = {
         'ts': str(time_stamp),
