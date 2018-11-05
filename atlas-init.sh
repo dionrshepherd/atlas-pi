@@ -24,14 +24,12 @@ case "$1" in
         pkill -9 -f pi_produce.py
 
         # unbind sensor from usb
-        # echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/unbind
-        sudo echo '1-1' > /sys/bus/usb/drivers/usb/unbind
+        echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/unbind
 
         sleep 5s
 
         # bind sensor to usb
-        # echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/bind
-        sudo echo '1-1' > /sys/bus/usb/drivers/usb/bind
+        echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/bind
         ;;
     *)
         echo "Usage: /etc/init.d/atlas-init.sh {start|stop}"
