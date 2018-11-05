@@ -1,5 +1,14 @@
-#! /usr/bin/env bash
-#  /etc/init.d/atlas-init
+#! /bin/sh
+#
+### BEGIN INIT INFO
+# Provides:          pitracker
+# Required-Start:    $all
+# Required-Stop:
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Track pi.
+# Description:       This service is used to track a pi.
+### END INIT INFO
 
 # Some things that run always
 touch /var/lock/atlas-init.sh
@@ -11,7 +20,7 @@ case "$1" in
         echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/bind
 
         # run the produce script
-        /usr/bin/python3 /home/linaro/atlas-pi/pi_produce.py
+        /usr/bin/python3 /home/linaro/atlas-pi/pi_produce.py &
 
         touch /home/linaro/start.txt
         ;;
