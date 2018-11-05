@@ -11,7 +11,7 @@ case "$1" in
         echo '1-1.4' | sudo tee /sys/bus/usb/drivers/usb/bind
 
         # run the produce script
-        # python3 /home/linaro/atlas-pi/pi_produce.py
+        python3 /home/linaro/atlas-pi/pi_produce.py
         ;;
     stop)
         # kill any running python scripts

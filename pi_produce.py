@@ -8,13 +8,13 @@ import re
 
 def put_to_db(time_stamp, tag_id, distance, anchor_id):
     print('tag: {}, distance: {}, ts: {}'.format(tag_id, distance, time_stamp))
+    open('heartbeat.txt', 'w').write(str(time_stamp))
+
     payload = {
         'ts': str(time_stamp),
         'dist': distance,
     }
 
-    # put a try catch around this block
-    # got a botocore Validation exception
     table.put_item(
         Item={
             'anchor': anchor_id,
@@ -89,7 +89,7 @@ try:
         for pos in positions:
             current_data = pos.split('=')
             if len(current_data) == 2:
-                if len(current_data[0]) == 4 and len(current_data[1]) > 0 :
+                if len(current_data[0]) == 4 and len(current_data[1]) > 0:
                     # seen_tag = {
                     #     "id": current_data[0],
                     #     "dist": current_data[1],
