@@ -16,12 +16,18 @@ sudo touch /var/lock/atlas-init.sh
 # Carry out specific functions when asked to by the system
 case "$1" in
     start)
+        # run the clear script
+        /usr/bin/python3 /usr/local/sbin/clear.py &
+
         # run the produce script
         /usr/bin/python3 /usr/local/sbin/pi_produce.py &
         ;;
     stop)
         # kill any running python scripts
         pkill -9 -f pi_produce.py
+
+        # maybe run the clear script here too, not sure yet
+        # /usr/bin/python3 /usr/local/sbin/clear.py &
 
         # unbind sensor from usb
         echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/unbind
