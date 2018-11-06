@@ -36,15 +36,16 @@ def get_tag_index(id_to_check, tags):
     return -1, {}
 
 
-logging.basicConfig(filename='/home/linaro/pi_produce.log', format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-adapter = logging.LoggerAdapter(logger, {'uid': str(uuid.uuid4())})
-
 anchorId = os.environ['ANCHOR_ID']
 if len(anchorId) > 4:
     print('Anchor ID has not been set in .bashrc')
     sys.exit(1)
 print('...Anchor ID: %s...'.format(anchorId))
+
+filename = '/home/linaro/%s.log'.format(anchorId)
+logging.basicConfig(filename=filename, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+adapter = logging.LoggerAdapter(logger, {'uid': str(uuid.uuid4())})
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('atlas_dev')
