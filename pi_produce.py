@@ -42,7 +42,7 @@ if len(anchorId) > 4:
     sys.exit(1)
 print('...Anchor ID: %s...'.format(anchorId))
 
-filename = '/home/linaro/%s.log'.format(anchorId)
+filename = '/home/linaro/{}.log'.format(anchorId)
 logging.basicConfig(filename=filename, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 adapter = logging.LoggerAdapter(logger, {'uid': str(uuid.uuid4())})
