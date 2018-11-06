@@ -47,12 +47,11 @@ anchorId = os.environ['ANCHOR_ID']
 if len(anchorId) > 4:
     print('Anchor ID has not been set in .bashrc')
     sys.exit(1)
-print('...Anchor ID: %s...'.format(anchorId))
+print('...Anchor ID: {}...'.format(anchorId))
 
 filename = '/home/linaro/{}.log'.format(anchorId)
 logging.basicConfig(filename=filename, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.WARNING)
 logger = logging.getLogger(__name__)
-adapter = CustomAdapter(logger, {'uid': str(uuid.uuid4())})
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('atlas_dev')
@@ -90,6 +89,7 @@ ser.flushInput()
 print('...Reading positions...')
 try:
     while True:
+        adapter = CustomAdapter(logger, {'uid': str(uuid.uuid4())})
         # get position data and strip newlines
         raw_data = ser.readline().rstrip().decode()
         adapter.warning('Raw data: %s', raw_data)
