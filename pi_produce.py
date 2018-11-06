@@ -14,7 +14,7 @@ def put_to_db(time_stamp, tag_id, distance, anchor_id):
         'dist': distance,
     }
 
-    logging.debug('payload for tag %s: %s', tag_id, payload)
+    logger.debug('payload for tag %s: %s', tag_id, payload)
 
     response = table.put_item(
         Item={
@@ -24,7 +24,7 @@ def put_to_db(time_stamp, tag_id, distance, anchor_id):
         }
     )
 
-    logging.debug('Response: %s', response)
+    logger.debug('Response: %s', response)
 
     # print('tag: {}, distance: {}, ts: {}'.format(tag_id, distance, time_stamp))
     return
@@ -37,19 +37,22 @@ def get_tag_index(id_to_check, tags):
     return -1, {}
 
 
-uid = str(uuid.uuid4())
-logging.basicConfig(filename='/home/linaro/pi_produce.log', format='%(asctime)s %(uid)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+extra = {'uid': str(uuid.uuid4())}
+logging.basicConfig(filename='/home/linaro/pi_produce.log', format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger = logging.LoggerAdapter(logger, extra)
+
 anchorId = os.environ['ANCHOR_ID']
 if len(anchorId) > 4:
-    logging.error('Anchor ID has not been set in .bashrc')
+    logger.error('Anchor ID has not been set in .bashrc')
     sys.exit(1)
-logging.info('...Anchor ID: %s...', anchorId)
+logger.info('...Anchor ID: %s...', anchorId)
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('atlas_dev')
 previous_tic_tags = []
 
-logging.info('...Opening serial port...')
+logger.info('...Opening serial port...')
 ser = serial.Serial(
     port='/dev/ttyACM0',
     baudrate=115200,
@@ -58,7 +61,7 @@ ser = serial.Serial(
     bytesize=serial.SEVENBITS,
 )
 
-logging.info('...Sending les command...')
+logger.info('...Sending les command...')
 ser.write(b'\r\r')
 time.sleep(0.5)
 
@@ -78,16 +81,16 @@ ser.readline()
 ser.flushInput()
 
 # keep reading positions
-logging.info('...Reading positions...')
+logger.info('...Reading positions...')
 try:
     while True:
         # get position data and strip newlines
         raw_data = ser.readline().rstrip().decode()
-        logging.debug('Raw data: %s', raw_data)
+        logger.debug('Raw data: %s', raw_data)
 
         # remove uneeded data that is between [] and split based on a space
         positions = re.sub("[\(\[].*?[\)\]]", '', raw_data).split()
-        logging.debug('%d raw positions after regex: %s', len(positions), positions)
+        logger.debug('%d raw positions after regex: %s', len(positions), positions)
 
         # set timestamp arrays
         timeStamp = time.time()
