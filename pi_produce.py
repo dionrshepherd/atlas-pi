@@ -25,8 +25,7 @@ def put_to_db(time_stamp, tag_id, distance, anchor_id):
     )
 
     logger.debug('Response: %s', response)
-
-    # print('tag: {}, distance: {}, ts: {}'.format(tag_id, distance, time_stamp))
+    print('tag: {}, distance: {}, ts: {}'.format(tag_id, distance, time_stamp))
     return
 
 
