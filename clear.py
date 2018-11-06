@@ -9,8 +9,7 @@ ser = serial.Serial(
     baudrate=115200,
     parity=serial.PARITY_ODD,
     stopbits=serial.STOPBITS_ONE_POINT_FIVE,
-    bytesize=serial.SEVENBITS,
-    timeout=0.2
+    bytesize=serial.SEVENBITS
 )
 
 print('...Send command...')
@@ -22,8 +21,8 @@ ser.readline()
 ser.readline()
 
 print('...Resetting...')
-ser.write(b'nmt\r')
+ser.write(b'reset\r')
 ser.readline()
-time.sleep(2)
+time.sleep(5)
 ser.close()
 sys.exit(0)
