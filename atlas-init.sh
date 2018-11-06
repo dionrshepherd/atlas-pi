@@ -26,12 +26,9 @@ case "$1" in
         ;;
     stop)
         # kill any running python scripts
-        pkill -9 -f pi_produce.py
+        pkill -9 -f pi_produce2.py
 
-        sleep 2s
-
-        # maybe run the clear script here too, not sure yet
-        # /usr/bin/python3 /usr/local/sbin/clear.py &
+        wait
 
         # unbind sensor from usb
         echo '1-1' | sudo tee /sys/bus/usb/drivers/usb/unbind
