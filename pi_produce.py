@@ -14,7 +14,7 @@ def put_to_db(time_stamp, tag_id, distance, anchor_id):
         'dist': distance,
     }
 
-    adapter.debug('payload for tag %s: %s', tag_id, payload)
+    adapter.warning('payload for tag %s: %s', tag_id, payload)
 
     response = table.put_item(
         Item={
@@ -24,7 +24,7 @@ def put_to_db(time_stamp, tag_id, distance, anchor_id):
         }
     )
 
-    adapter.debug('Response: %s', response)
+    adapter.warning('Response: %s', response)
     print('tag: {}, distance: {}, ts: {}'.format(tag_id, distance, time_stamp))
     return
 
@@ -43,7 +43,7 @@ if len(anchorId) > 4:
 print('...Anchor ID: %s...'.format(anchorId))
 
 filename = '/home/linaro/{}.log'.format(anchorId)
-logging.basicConfig(filename=filename, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+logging.basicConfig(filename=filename, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.WARNING)
 logger = logging.getLogger(__name__)
 adapter = logging.LoggerAdapter(logger, {'uid': str(uuid.uuid4())})
 
@@ -85,11 +85,11 @@ try:
     while True:
         # get position data and strip newlines
         raw_data = ser.readline().rstrip().decode()
-        adapter.debug('Raw data: %s', raw_data)
+        adapter.warning('Raw data: %s', raw_data)
 
         # remove uneeded data that is between [] and split based on a space
         positions = re.sub("[\(\[].*?[\)\]]", '', raw_data).split()
-        adapter.debug('%d raw positions after regex: %s', len(positions), positions)
+        adapter.warning('%d raw positions after regex: %s', len(positions), positions)
 
         # set timestamp arrays
         timeStamp = time.time()
