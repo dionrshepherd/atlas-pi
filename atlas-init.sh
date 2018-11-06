@@ -20,7 +20,7 @@ case "$1" in
         /usr/bin/python3 /usr/local/sbin/clear.py &
 
         # run the produce script
-        /usr/bin/python3 /usr/local/sbin/pi_produce.py &
+        /usr/bin/python3 /usr/local/sbin/pi_produce2.py &
         ;;
     stop)
         # kill any running python scripts

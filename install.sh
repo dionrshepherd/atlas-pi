@@ -1,7 +1,6 @@
 #!/usr/bin/env bash
 set -e
 
-# username password and hostname
 echo "Has the user password, root password and hostname been changed (y/n)"
 read -p '>' install
 
@@ -25,7 +24,7 @@ if [ "$install" = "y" ]; then
         cp .bashrc ../
 
     fi
-    # copy python script to sbin
+    # copy python scripts to sbin
     echo "copy clear script"
     cp /home/linaro/atlas-pi/clear.py /usr/local/sbin/
     echo "copy produce script"
@@ -36,8 +35,6 @@ if [ "$install" = "y" ]; then
     cp /home/linaro/atlas-pi/atlas-init.sh /etc/init.d/
     echo "chmod file"
     sudo chmod 755 /etc/init.d/atlas-init.sh
-    #echo "chown file"
-    #sudo chown root:root /etc/init.d/atlas-init.sh
     echo "add to defaults"
     sudo update-rc.d atlas-init.sh defaults
 
