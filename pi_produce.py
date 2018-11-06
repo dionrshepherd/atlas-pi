@@ -4,24 +4,29 @@ import os
 import sys
 import boto3
 import re
+import logging
+import uuid
 
 
 def put_to_db(time_stamp, tag_id, distance, anchor_id):
-    print('tag: {}, distance: {}, ts: {}'.format(tag_id, distance, time_stamp))
-    # open('/home/linaro/heartbeat.txt', 'w').write(str(time_stamp))
-
     payload = {
         'ts': str(time_stamp),
         'dist': distance,
     }
 
-    table.put_item(
+    logging.debug('payload for tag %s: %s', tag_id, payload)
+
+    response = table.put_item(
         Item={
             'anchor': anchor_id,
             'tag': tag_id,
             'data': payload
         }
     )
+
+    logging.debug('Response: %s', response)
+
+    # print('tag: {}, distance: {}, ts: {}'.format(tag_id, distance, time_stamp))
     return
 
 
@@ -32,18 +37,19 @@ def get_tag_index(id_to_check, tags):
     return -1, {}
 
 
+uid = str(uuid.uuid4())
+logging.basicConfig(filename='/home/linaro/pi_produce.log', format='%(asctime)s %(uid)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
 anchorId = os.environ['ANCHOR_ID']
 if len(anchorId) > 4:
-    print('Anchor ID has not been set in .bashrc')
+    logging.error('Anchor ID has not been set in .bashrc')
     sys.exit(1)
-print('...Anchor ID: ' + anchorId + '...')
+logging.info('...Anchor ID: %s...', anchorId)
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('atlas_dev')
 previous_tic_tags = []
 
-
-print('...Opening serial port...')
+logging.info('...Opening serial port...')
 ser = serial.Serial(
     port='/dev/ttyACM0',
     baudrate=115200,
@@ -52,8 +58,7 @@ ser = serial.Serial(
     bytesize=serial.SEVENBITS,
 )
 
-print('...Sending les command...')
-# 2 newlines needed to access the command prompt
+logging.info('...Sending les command...')
 ser.write(b'\r\r')
 time.sleep(0.5)
 
@@ -73,14 +78,16 @@ ser.readline()
 ser.flushInput()
 
 # keep reading positions
-print('...Reading positions...')
+logging.info('...Reading positions...')
 try:
     while True:
         # get position data and strip newlines
-        current_data = ser.readline().rstrip().decode()
+        raw_data = ser.readline().rstrip().decode()
+        logging.debug('Raw data: %s', raw_data)
 
         # remove uneeded data that is between [] and split based on a space
-        positions = re.sub("[\(\[].*?[\)\]]", '', current_data).split()
+        positions = re.sub("[\(\[].*?[\)\]]", '', raw_data).split()
+        logging.debug('%d raw positions after regex: %s', len(positions), positions)
 
         # set timestamp arrays
         timeStamp = time.time()
@@ -110,6 +117,7 @@ try:
                     # else:
                     #     previous_tic_tags.append(seen_tag)
                     #     put_to_db(timeStamp, current_data[0], current_data[1], anchorId)
+
                     put_to_db(timeStamp, current_data[0], current_data[1], anchorId)
 
 except KeyboardInterrupt:

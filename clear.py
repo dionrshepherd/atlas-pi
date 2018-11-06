@@ -12,7 +12,7 @@ ser = serial.Serial(
     bytesize=serial.SEVENBITS
 )
 
-print('...Send command...')
+print('...Sending reset command...')
 ser.write(b'\r\r')
 time.sleep(0.5)
 
