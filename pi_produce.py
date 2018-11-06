@@ -36,6 +36,13 @@ def get_tag_index(id_to_check, tags):
     return -1, {}
 
 
+class CustomAdapter(logging.LoggerAdapter):
+    def process(self, msg, kwargs):
+        # use my_context from kwargs or the default given on instantiation
+        my_context = kwargs.pop('uid', self.extra['uid'])
+        return '[%s] %s' % (my_context, msg), kwargs
+
+
 anchorId = os.environ['ANCHOR_ID']
 if len(anchorId) > 4:
     print('Anchor ID has not been set in .bashrc')
@@ -45,7 +52,7 @@ print('...Anchor ID: %s...'.format(anchorId))
 filename = '/home/linaro/{}.log'.format(anchorId)
 logging.basicConfig(filename=filename, format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.WARNING)
 logger = logging.getLogger(__name__)
-adapter = logging.LoggerAdapter(logger, {'uid': str(uuid.uuid4())})
+adapter = CustomAdapter(logger, {'uid': str(uuid.uuid4())})
 
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table('atlas_dev')
