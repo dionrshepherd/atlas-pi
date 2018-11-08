@@ -38,7 +38,7 @@ def lambda_handler(event, context):
                     y = float(item['payload']['y'])
                     z = float(item['payload']['z'])
                 except(ValueError):
-                    logger['response'] = 'ERROR'
+                    logger['level'] = 'ERROR'
                     logger['message'] = 'Number Value Error:{}'.format(item)
                     print(json.dumps(logger))
                     continue
@@ -63,8 +63,8 @@ def lambda_handler(event, context):
                     Message=json.dumps(tag)
                 )
 
-                logger['response'] = 'SUCCESS'
-                logger['message'] = ''
+                logger['level'] = 'SUCCESS'
+                logger['message'] = 'successful MQTT and SNS publish'
                 print(json.dumps(logger))
         else:
             continue
