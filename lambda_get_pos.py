@@ -6,7 +6,7 @@ import time
 
 
 db_resource = boto3.resource('dynamodb')
-table = db_resource.Table('atlas_dev')
+table = db_resource.Table('atlas_dev_v2')
 sns_client = boto3.client('sns', region_name='ap-southeast-2')
 iot_data_client = boto3.client('iot-data', region_name='ap-southeast-2')
 
@@ -19,7 +19,7 @@ def lambda_handler(event, context):
     logger['level'] = ''
     logger['message'] = ''
 
-    for record in event['Records']:
+    for record in event['Records']: # might remove this first call, just get the state of the db
         tag_id = record['dynamodb']['Keys']['id']['S']
 
         if len(tag_id) == 4:
@@ -30,13 +30,13 @@ def lambda_handler(event, context):
                     FilterExpression=Attr('id').eq(tag_id)
                 )
 
-                item = response['Items'] # might be an array
+                item = response['Items'][0] # is an array, should only return one, so take the first
                 logger['tagId'] = tag_id
 
                 try:
-                    x = float(item['x'])
-                    y = float(item['y'])
-                    z = float(item['z'])
+                    x = float(item['payload']['x'])
+                    y = float(item['payload']['y'])
+                    z = float(item['payload']['z'])
                 except(ValueError):
                     logger['response'] = 'ERROR'
                     logger['message'] = 'Number Value Error:{}'.format(item)
@@ -44,7 +44,7 @@ def lambda_handler(event, context):
                     continue
 
                 tag = {
-                    "tag": tag_id,
+                    "tag": 'C52A',
                     "x": x,
                     "y": y,
                     "z": z,
