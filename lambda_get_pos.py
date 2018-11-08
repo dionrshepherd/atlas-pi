@@ -18,8 +18,12 @@ def lambda_handler(event, context):
     logger['uuid'] = uid
     logger['level'] = ''
     logger['message'] = ''
+    print(json.dumps(event['Records']))
 
     for record in event['Records']: # might remove this first call, just get the state of the db
+        if record['eventName'] == 'REMOVE':
+            continue
+
         tag_id = record['dynamodb']['Keys']['id']['S']
 
         if len(tag_id) == 4:
@@ -29,6 +33,8 @@ def lambda_handler(event, context):
                 response = table.scan(
                     FilterExpression=Attr('id').eq(tag_id)
                 )
+
+                print(response)
 
                 item = response['Items'][0] # is an array, should only return one, so take the first
                 logger['tagId'] = tag_id
@@ -44,7 +50,7 @@ def lambda_handler(event, context):
                     continue
 
                 tag = {
-                    "tag": 'C52A',
+                    "tag": tag_id,
                     "x": x,
                     "y": y,
                     "z": z,
