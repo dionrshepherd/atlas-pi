@@ -25,7 +25,7 @@ def lambda_handler(event, context):
         }
 
         iot_data_client.publish(
-            topic='atlasDevTagCoords',
+            topic='atlasTagCoords',
             payload=json.dumps(tag)
         )
 
