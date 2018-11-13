@@ -30,7 +30,7 @@ def lambda_handler(event, context):
         )
 
         sns_client.publish(
-            TopicArn='arn:aws:sns:ap-southeast-2:430634712358:atlas-proximity-event',
+            TopicArn='arn:aws:sns:ap-southeast-2:608821816028:proximity_event',
             Message=json.dumps(tag)
         )
 
