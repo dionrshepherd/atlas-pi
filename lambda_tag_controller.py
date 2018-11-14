@@ -7,7 +7,6 @@ from boto3.dynamodb.conditions import Attr
 sns_client = boto3.client('sns')
 db_resource = boto3.resource('dynamodb')
 table = db_resource.Table('atlas_dev')
-# s3_client = boto3.client('s3')
 
 
 def lambda_handler(event, context):
@@ -42,19 +41,6 @@ def lambda_handler(event, context):
                 "anchors": anchors
             }
 
-            # s3_client.put_object(
-            #     Bucket='atlas-previous-tags',
-            #     Key=tag_id + '/', # this will be the id
-            #     Body=b"{id: 32}"
-            # )
-            #
-            # data = s3_client.get_object(
-            #     Bucket='atlas-previous-tags',
-            #     Key='loop'
-            # )
-
-            # debug
-            # print(data['Body'].read().decode("utf-8"))
             print(tag)
 
             found_tags.append(tag_id)
